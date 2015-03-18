@@ -23,25 +23,37 @@ public class GDXTop extends ApplicationAdapter {
         this.mViewport = new FitViewport( 960.0f, 540.0f, this.mCamera );
         this.mViewport.apply();
 
-        this.mCamera.position.set( this.mCamera.viewportWidth / 2, this.mCamera.viewportHeight / 2, 0 );
+        this.mCamera.position.set(this.mCamera.viewportWidth / 2, this.mCamera.viewportHeight / 2, 0);
 
 		batch = new SpriteBatch();
 		this.mSprite = new Sprite( new Texture("badlogic.jpg") );
         this.mSprite.setPosition( 0.0f, 0.0f );
-        this.mSprite.setSize( 100.0f, 100.0f );
+        this.mSprite.setSize(100.0f, 100.0f);
+        RenderSystem render = new RenderSystem();
+        ObjectRegistry.sRenderSystem = render;
 	}
 
 	@Override
-	public void render () {
+	public void render() {
         this.mCamera.update();
 
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
 
-        batch.setProjectionMatrix( this.mCamera.combined );
-		batch.begin();
-		this.mSprite.draw( batch );
-		batch.end();
+        Sprite sprite1 = new Sprite( new Texture("badlogic.jpg") );
+        sprite1.setPosition( 0.0f, 0.0f );
+        sprite1.setSize( 100.0f, 100.0f );
+        SpriteRenderComponent spriteCom = new SpriteRenderComponent();
+        spriteCom.setSprite( sprite1 );
+
+        GameObject test = new GameObject();
+        test.add( spriteCom );
+        test.update( 1.0f, null );
+
+        renderSystem.setCamera( this.mCamera );
+        renderSystem.render();
+        renderSystem.swap();
 	}
 
     @Override
