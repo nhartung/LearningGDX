@@ -1,18 +1,18 @@
 package nickhartung.learninggdx;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-
 import nickhartung.libgdx.utilities.BaseObject;
+import nickhartung.libgdx.utilities.SpriteDrawable;
 
 /**
  * Created by Nick on 3/14/2015.
  */
-public class SpriteRenderComponent extends GameComponent {
+public class SpriteRenderComponent extends RenderComponent {
 
-    private Sprite mSprite;
+    private SpriteDrawable mSprite;
 
     public SpriteRenderComponent() {
         super();
+        this.mSprite = new SpriteDrawable();
         this.setPhase( ComponentPhases.DRAW.ordinal() );
     }
 
@@ -21,21 +21,19 @@ public class SpriteRenderComponent extends GameComponent {
         if( mSprite != null ) {
             RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
             if( renderSystem != null ) {
-                renderSystem.scheduleForDraw( mSprite );
+                final GameObject gameObject = (GameObject)parent;
+                renderSystem.scheduleForDraw( mSprite, gameObject.getPosition(), this.mPriority );
             }
         }
     }
 
     @Override
     public void reset() {
+        super.reset();
         mSprite = null;
     }
 
-    public void setSprite( final Sprite pSprite ) {
+    public void setSpriteDrawable( final SpriteDrawable pSprite ) {
         this.mSprite = pSprite;
-    }
-
-    public final Sprite getSprite() {
-        return this.mSprite;
     }
 }
