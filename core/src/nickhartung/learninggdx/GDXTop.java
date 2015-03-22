@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import nickhartung.libgdx.utilities.BoxShapeDrawable;
 import nickhartung.libgdx.utilities.CircleShapeDrawable;
+import nickhartung.libgdx.utilities.ObjectManager;
 import nickhartung.libgdx.utilities.SpriteDrawable;
 
 public class GDXTop extends ApplicationAdapter {
@@ -26,6 +27,12 @@ public class GDXTop extends ApplicationAdapter {
     private Renderer mRenderer;
     private SpriteBatch mSpriteBatch;
     private ShapeRenderer mShapeRenderer;
+
+    private GameObject test;
+    private GameObject test2;
+    private GameObject test3;
+    private GameObject test4;
+    private ObjectManager manager;
 	
 	@Override
 	public void create () {
@@ -48,35 +55,15 @@ public class GDXTop extends ApplicationAdapter {
         render.setSpriteBatch(this.mSpriteBatch);
         render.setShapeRenderer( this.mShapeRenderer );
         ObjectRegistry.sRenderSystem = render;
-	}
 
-	@Override
-	public void render() {
-        this.mCamera.update();
-
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
-
+        ///////////////////
         Sprite sprite1 = new Sprite( new Texture("badlogic.jpg") );
         sprite1.setSize(100.0f, 100.0f);
-        SpriteRenderComponent spriteCom = new SpriteRenderComponent();
+        RenderComponent renderCom = new RenderComponent();
         SpriteDrawable spriteDrawable = new SpriteDrawable();
         spriteDrawable.setSprite( sprite1 );
-        spriteCom.setSpriteDrawable(spriteDrawable);
-        spriteCom.setPriority( 1 );
-
-        GameObject test = new GameObject();
-        test.add( spriteCom );
-        test.setPosition( test.getPosition().add( 0.0f, 0.0f ) );
-
-
-        GameObject test2 = new GameObject();
-        test2.add( spriteCom );
-        test2.setPosition( test2.getPosition().add( 100.0f, 100.0f ) );
-
-        test.update( 1.0f, null );
-        test2.update( 1.0f, null );
+        renderCom.setDrawable(spriteDrawable);
+        renderCom.setPriority( 1 );
 
         Color red = new Color();
         red.set( 1.0f, 0.0f, 0.0f, 1.0f );
@@ -98,9 +85,55 @@ public class GDXTop extends ApplicationAdapter {
         Vector2 pos2 = new Vector2();
         pos2.set( 100.0f, 100.0f );
 
-        renderSystem.scheduleForDraw( box,    pos,  3 );
-        renderSystem.scheduleForDraw( circle, pos2, 2 );
+        RenderComponent boxRenderer = new RenderComponent();
+        boxRenderer.setPriority( 0 );
+        boxRenderer.setDrawable( box );
 
+        RenderComponent circleRenderer = new RenderComponent();
+        circleRenderer.setPriority( 0 );
+        circleRenderer.setDrawable( circle );
+
+        MovementComponent movement = new MovementComponent();
+        movement.shared = true;
+
+        TestMovementComponent testComp = new TestMovementComponent();
+        testComp.setMovementSpeed( 100.0f, 20.0f );
+
+        test = new GameObject();
+        test.add( renderCom );
+        test.add( movement );
+        test.add( testComp );
+        test.setPosition( test.getPosition().add( 0.0f, 0.0f ) );
+
+        test2 = new GameObject();
+        test2.add( renderCom );
+        test2.setPosition( test2.getPosition().add( 100.0f, 100.0f ) );
+
+        test3 = new GameObject();
+        test3.add( boxRenderer );
+        test3.setPosition( test3.getPosition().add( 150.0f, 150.0f ) );
+
+        test4 = new GameObject();
+        test4.add( circleRenderer );
+        test4.setPosition( test4.getPosition().add( 100.0f, 100.0f ) );
+
+        manager = new ObjectManager( 64 );
+        manager.add( test );
+        manager.add( test2 );
+        manager.add( test3 );
+        manager.add( test4 );
+
+	}
+
+	@Override
+	public void render() {
+        this.mCamera.update();
+
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
+
+        manager.update( Gdx.graphics.getDeltaTime(), null );
         renderSystem.swap( mRenderer, mCamera );
         mRenderer.render();
 	}
