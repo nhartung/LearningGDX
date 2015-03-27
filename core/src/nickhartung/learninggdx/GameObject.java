@@ -41,6 +41,7 @@ public class GameObject extends PhasedObjectManager {
     private static final int DEFAULT_LIFE = 1;
 
     public enum ActionType {
+        ACTIVE,
         INVALID,
     }
 

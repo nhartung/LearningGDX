@@ -10,8 +10,11 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 import nickhartung.libgdx.utilities.BoxShapeDrawable;
 import nickhartung.libgdx.utilities.CircleShapeDrawable;
 import nickhartung.libgdx.utilities.ObjectManager;
@@ -56,6 +59,18 @@ public class GDXTop extends ApplicationAdapter {
         render.setShapeRenderer( this.mShapeRenderer );
         ObjectRegistry.sRenderSystem = render;
 
+        World world = new World( new Vector2( 0, 0 ), true );
+        RayHandler rayHandler = new RayHandler( world );
+        rayHandler.setCulling(true);
+        rayHandler.useDiffuseLight(true);
+        rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 1.0f);
+        ObjectRegistry.sRayHandler = rayHandler;
+
+        InputSystem inputSystem = new InputSystem();
+        ObjectRegistry.sInputSystem = inputSystem;
+
+        Gdx.input.setInputProcessor( new DebugInputProcessor() );
+
         ///////////////////
         Sprite sprite1 = new Sprite( new Texture("badlogic.jpg") );
         sprite1.setSize(100.0f, 100.0f);
@@ -97,12 +112,21 @@ public class GDXTop extends ApplicationAdapter {
         movement.shared = true;
 
         TestMovementComponent testComp = new TestMovementComponent();
-        testComp.setMovementSpeed( 100.0f, 20.0f );
+        testComp.setMovementSpeed( 100.0f, 50.0f );
+
+        PointLight pt = new PointLight(rayHandler, 5, new Color( 1.0f, 1.0f, 1.0f, 1.0f ), 30, 50.0f, 50.0f);
+        //pt.setStaticLight(true);
+
+        LightComponent lightCom = new LightComponent();
+        lightCom.setLight( pt );
+        lightCom.setOffset( 50.0f, 50.0f );
 
         test = new GameObject();
+        test.setCurrentAction( GameObject.ActionType.ACTIVE );
         test.add( renderCom );
         test.add( movement );
         test.add( testComp );
+        test.add( lightCom );
         test.setPosition( test.getPosition().add( 0.0f, 0.0f ) );
 
         test2 = new GameObject();
@@ -132,10 +156,13 @@ public class GDXTop extends ApplicationAdapter {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
+        final RayHandler   rayHandler   = ObjectRegistry.sRayHandler;
 
         manager.update( Gdx.graphics.getDeltaTime(), null );
         renderSystem.swap( mRenderer, mCamera );
         mRenderer.render();
+        rayHandler.setCombinedMatrix( this.mCamera.combined );
+        rayHandler.updateAndRender();
 	}
 
     @Override
