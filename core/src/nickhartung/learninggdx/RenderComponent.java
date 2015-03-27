@@ -18,12 +18,12 @@ public class RenderComponent extends GameComponent {
     }
 
     @Override
-    public void update( float timeDelta, BaseObject parent ) {
-        if( mDrawable != null ) {
+    public void update( float timeDelta, final BaseObject parent ) {
+        if( this.mDrawable != null ) {
             RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
             if( renderSystem != null ) {
                 final GameObject gameObject = (GameObject)parent;
-                renderSystem.scheduleForDraw( mDrawable, gameObject.getPosition(), this.mPriority );
+                renderSystem.scheduleForDraw( this.mDrawable, gameObject.getPosition(), this.mPriority );
             }
         }
     }

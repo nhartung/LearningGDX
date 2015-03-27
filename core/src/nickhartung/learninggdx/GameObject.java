@@ -1,5 +1,3 @@
-package nickhartung.learninggdx;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.learninggdx;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.learninggdx;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -50,13 +49,13 @@ public class GameObject extends PhasedObjectManager {
     public GameObject() {
         super();
 
-        mPosition = new Vector2();
-        mVelocity = new Vector2();
-        mTargetVelocity = new Vector2();
-        mAcceleration = new Vector2();
-        mImpulse = new Vector2();
+        this.mPosition = new Vector2();
+        this.mVelocity = new Vector2();
+        this.mTargetVelocity = new Vector2();
+        this.mAcceleration = new Vector2();
+        this.mImpulse = new Vector2();
 
-        mFacingDirection = new Vector2(1, 0);
+        this.mFacingDirection = new Vector2( 1, 0 );
 
         reset();
     }
@@ -66,72 +65,72 @@ public class GameObject extends PhasedObjectManager {
         removeAll();
         commitUpdates();
 
-        mPosition.setZero();
-        mVelocity.setZero();
-        mTargetVelocity.setZero();
-        mAcceleration.setZero();
-        mImpulse.setZero();
-        mFacingDirection.set(1.0f, 1.0f);
+        this.mPosition.setZero();
+        this.mVelocity.setZero();
+        this.mTargetVelocity.setZero();
+        this.mAcceleration.setZero();
+        this.mImpulse.setZero();
+        this.mFacingDirection.set( 1.0f, 1.0f );
 
-        mCurrentAction = ActionType.INVALID;
-        width = 0.0f;
-        height = 0.0f;
+        this.mCurrentAction = ActionType.INVALID;
+        this.width = 0.0f;
+        this.height = 0.0f;
     }
 
     public final Vector2 getPosition() {
-        return mPosition;
+        return this.mPosition;
     }
 
     public final void setPosition( final Vector2 position ) {
-        mPosition.set(position);
+        this.mPosition.set( position );
     }
 
     public final float getCenteredPositionX() {
-        return mPosition.x + (width / 2.0f);
+        return this.mPosition.x + ( width / 2.0f );
     }
 
     public final float getCenteredPositionY() {
-        return mPosition.y + (height / 2.0f);
+        return this.mPosition.y + ( height / 2.0f );
     }
 
     public final Vector2 getVelocity() {
-        return mVelocity;
+        return this.mVelocity;
     }
 
     public final void setVelocity( final Vector2 velocity ) {
-        mVelocity.set(velocity);
+        this.mVelocity.set( velocity );
     }
 
     public final Vector2 getTargetVelocity() {
-        return mTargetVelocity;
+        return this.mTargetVelocity;
     }
 
     public final void setTargetVelocity( final Vector2 targetVelocity ) {
-        mTargetVelocity.set(targetVelocity);
+        this.mTargetVelocity.set( targetVelocity );
     }
 
     public final Vector2 getAcceleration() {
-        return mAcceleration;
+        return this.mAcceleration;
     }
 
     public final void setAcceleration( final Vector2 acceleration ) {
-        mAcceleration.set(acceleration);
+        this.mAcceleration.set( acceleration );
     }
 
     public final Vector2 getImpulse() {
-        return mImpulse;
+        return this.mImpulse;
     }
 
     public final void setImpulse( final Vector2 impulse ) {
-        mImpulse.set(impulse);
+        this.mImpulse.set( impulse );
     }
 
     public final ActionType getCurrentAction() {
-        return mCurrentAction;
+        return this.mCurrentAction;
     }
 
     public final void setCurrentAction( final ActionType type ) {
-        mCurrentAction = type;
+        this.mCurrentAction = type;
     }
 
     public final Vector2 getFacingDirection() {

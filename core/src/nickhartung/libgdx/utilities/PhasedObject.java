@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 /**
  * A basic object that adds an execution phase.  When PhasedObjects are combined with
@@ -34,7 +33,7 @@ public class PhasedObject extends BaseObject {
 
     }
 
-    public void setPhase(int phaseValue) {
+    public void setPhase( int phaseValue ) {
         phase = phaseValue;
     }
 }

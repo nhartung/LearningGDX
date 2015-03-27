@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 
 /**
@@ -30,10 +29,11 @@ public abstract class BaseObject extends AllocationGuard {
 
     /**
      * Update this object.
-     * @param timeDelta  The duration since the last update (in seconds).
-     * @param parent  The parent of this object (may be NULL).
+     *
+     * @param timeDelta The duration since the last update (in seconds).
+     * @param parent    The parent of this object (may be NULL).
      */
-    public void update(float timeDelta, BaseObject parent) {
+    public void update( final float timeDelta, final BaseObject parent ) {
         // Base class does nothing.
     }
 

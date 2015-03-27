@@ -10,24 +10,24 @@ import nickhartung.libgdx.utilities.BaseObject;
  */
 public class LightComponent extends GameComponent {
 
-    private Light   mLight;
+    private Light mLight;
     private Vector2 mOffset;
 
     public LightComponent() {
-        mOffset = new Vector2();
+        this.mOffset = new Vector2();
     }
 
     @Override
-    public void update( float timeDelta, BaseObject parent ) {
-        assert( parent != null );
+    public void update( final float timeDelta, final BaseObject parent ) {
+        assert ( parent != null );
         final GameObject object = (GameObject)parent;
         final GameObject.ActionType action = object.getCurrentAction();
         if( action == GameObject.ActionType.ACTIVE ) {
             final Vector2 position = object.getPosition();
-            mLight.setPosition( position.x + this.mOffset.x, position.y + this.mOffset.y );
-            mLight.setActive( true );
+            this.mLight.setPosition( position.x + this.mOffset.x, position.y + this.mOffset.y );
+            this.mLight.setActive( true );
         } else {
-            mLight.setActive( false );
+            this.mLight.setActive( false );
         }
     }
 

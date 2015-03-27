@@ -21,8 +21,8 @@ import nickhartung.libgdx.utilities.ObjectManager;
 import nickhartung.libgdx.utilities.SpriteDrawable;
 
 public class GDXTop extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
+    SpriteBatch batch;
+    Texture img;
 
     private OrthographicCamera mCamera;
     private FitViewport mViewport;
@@ -36,18 +36,18 @@ public class GDXTop extends ApplicationAdapter {
     private GameObject test3;
     private GameObject test4;
     private ObjectManager manager;
-	
-	@Override
-	public void create () {
-        this.mCamera   = new OrthographicCamera();
+
+    @Override
+    public void create() {
+        this.mCamera = new OrthographicCamera();
         this.mViewport = new FitViewport( 960.0f, 540.0f, this.mCamera );
         this.mViewport.apply();
 
-        this.mCamera.position.set(this.mCamera.viewportWidth / 2, this.mCamera.viewportHeight / 2, 0);
+        this.mCamera.position.set( this.mCamera.viewportWidth / 2, this.mCamera.viewportHeight / 2, 0 );
 
-		this.mSprite = new Sprite( new Texture("badlogic.jpg") );
+        this.mSprite = new Sprite( new Texture( "badlogic.jpg" ) );
         this.mSprite.setPosition( 0.0f, 0.0f );
-        this.mSprite.setSize(100.0f, 100.0f);
+        this.mSprite.setSize( 100.0f, 100.0f );
 
         this.mRenderer = new Renderer();
         this.mSpriteBatch = new SpriteBatch();
@@ -55,15 +55,15 @@ public class GDXTop extends ApplicationAdapter {
 
         RenderSystem render = new RenderSystem();
         render.setCamera( this.mCamera );
-        render.setSpriteBatch(this.mSpriteBatch);
+        render.setSpriteBatch( this.mSpriteBatch );
         render.setShapeRenderer( this.mShapeRenderer );
         ObjectRegistry.sRenderSystem = render;
 
         World world = new World( new Vector2( 0, 0 ), true );
         RayHandler rayHandler = new RayHandler( world );
-        rayHandler.setCulling(true);
-        rayHandler.useDiffuseLight(true);
-        rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 1.0f);
+        rayHandler.setCulling( true );
+        rayHandler.useDiffuseLight( true );
+        rayHandler.setAmbientLight( 0.2f, 0.2f, 0.2f, 1.0f );
         ObjectRegistry.sRayHandler = rayHandler;
 
         InputSystem inputSystem = new InputSystem();
@@ -72,12 +72,12 @@ public class GDXTop extends ApplicationAdapter {
         Gdx.input.setInputProcessor( new DebugInputProcessor() );
 
         ///////////////////
-        Sprite sprite1 = new Sprite( new Texture("badlogic.jpg") );
-        sprite1.setSize(100.0f, 100.0f);
+        Sprite sprite1 = new Sprite( new Texture( "badlogic.jpg" ) );
+        sprite1.setSize( 100.0f, 100.0f );
         RenderComponent renderCom = new RenderComponent();
         SpriteDrawable spriteDrawable = new SpriteDrawable();
         spriteDrawable.setSprite( sprite1 );
-        renderCom.setDrawable(spriteDrawable);
+        renderCom.setDrawable( spriteDrawable );
         renderCom.setPriority( 1 );
 
         Color red = new Color();
@@ -88,14 +88,14 @@ public class GDXTop extends ApplicationAdapter {
 
         BoxShapeDrawable box = new BoxShapeDrawable();
         box.set( 0.0f, 100.0f, 100.0f, 0.0f );
-        box.setColor(red);
+        box.setColor( red );
         box.setShapeType( ShapeRenderer.ShapeType.Line );
         Vector2 pos = new Vector2();
         pos.set( 150.0f, 150.0f );
 
         CircleShapeDrawable circle = new CircleShapeDrawable();
         circle.set( 75.0f, 50 );
-        circle.setColor(blue);
+        circle.setColor( blue );
         circle.setShapeType( ShapeRenderer.ShapeType.Filled );
         Vector2 pos2 = new Vector2();
         pos2.set( 100.0f, 100.0f );
@@ -114,7 +114,7 @@ public class GDXTop extends ApplicationAdapter {
         TestMovementComponent testComp = new TestMovementComponent();
         testComp.setMovementSpeed( 100.0f, 50.0f );
 
-        PointLight pt = new PointLight(rayHandler, 5, new Color( 1.0f, 1.0f, 1.0f, 1.0f ), 30, 50.0f, 50.0f);
+        PointLight pt = new PointLight( rayHandler, 5, new Color( 1.0f, 1.0f, 1.0f, 1.0f ), 30, 50.0f, 50.0f );
         //pt.setStaticLight(true);
 
         LightComponent lightCom = new LightComponent();
@@ -147,27 +147,27 @@ public class GDXTop extends ApplicationAdapter {
         manager.add( test3 );
         manager.add( test4 );
 
-	}
+    }
 
-	@Override
-	public void render() {
+    @Override
+    public void render() {
         this.mCamera.update();
 
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClearColor( 0, 0, 0, 1 );
+        Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
         final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
-        final RayHandler   rayHandler   = ObjectRegistry.sRayHandler;
+        final RayHandler rayHandler = ObjectRegistry.sRayHandler;
 
         manager.update( Gdx.graphics.getDeltaTime(), null );
         renderSystem.swap( mRenderer, mCamera );
         mRenderer.render();
         rayHandler.setCombinedMatrix( this.mCamera.combined );
         rayHandler.updateAndRender();
-	}
+    }
 
     @Override
-    public void resize (int width, int height) {
-        this.mViewport.update(width, height);
+    public void resize( int width, int height ) {
+        this.mViewport.update( width, height );
         this.mCamera.position.set( this.mCamera.viewportWidth / 2, this.mCamera.viewportHeight / 2, 0 );
     }
 }

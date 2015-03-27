@@ -23,12 +23,12 @@ public class TestMovementComponent extends GameComponent {
 
     @Override
     public void update( float timeDelta, BaseObject parent ) {
-        assert( parent != null );
+        assert ( parent != null );
         float targetX = 0.0f;
         float targetY = 0.0f;
         GameObject parentObject = (GameObject)parent;
         InputSystem input = ObjectRegistry.sInputSystem;
-        parentObject.getAcceleration().set(this.mAcceleration, this.mAcceleration);
+        parentObject.getAcceleration().set( this.mAcceleration, this.mAcceleration );
         if( input.moveUp() ) {
             targetY = this.mMaxSpeed;
         }
@@ -46,7 +46,7 @@ public class TestMovementComponent extends GameComponent {
 
     @Override
     public void reset() {
-        this.mMaxSpeed     = 0.0f;
+        this.mMaxSpeed = 0.0f;
         this.mAcceleration = 0.0f;
     }
 }

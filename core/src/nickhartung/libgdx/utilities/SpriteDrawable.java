@@ -18,7 +18,7 @@ public class SpriteDrawable extends DrawableObject {
 
     @Override
     public void draw( final float x, final float y ) {
-        assert( mSprite != null );
+        assert ( this.mSprite != null );
         SpriteBatch batch = ObjectRegistry.sRenderSystem.getSpriteBatch();
         this.mSprite.setPosition( x, y );
         this.mSprite.draw( batch );

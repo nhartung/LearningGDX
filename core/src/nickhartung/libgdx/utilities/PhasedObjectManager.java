@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 import java.util.Comparator;
 
@@ -30,35 +29,35 @@ public class PhasedObjectManager extends ObjectManager {
 
     public PhasedObjectManager() {
         super();
-        mDirty = false;
-        getObjects().setComparator(sPhasedObjectComparator);
-        getPendingObjects().setComparator(sPhasedObjectComparator);
-        mSearchDummy = new PhasedObject();
+        this.mDirty = false;
+        getObjects().setComparator( sPhasedObjectComparator );
+        getPendingObjects().setComparator( sPhasedObjectComparator );
+        this.mSearchDummy = new PhasedObject();
     }
 
-    public PhasedObjectManager(int arraySize) {
-        super(arraySize);
-        mDirty = false;
-        getObjects().setComparator(sPhasedObjectComparator);
-        getPendingObjects().setComparator(sPhasedObjectComparator);
-        mSearchDummy = new PhasedObject();
+    public PhasedObjectManager( final int arraySize ) {
+        super( arraySize );
+        this.mDirty = false;
+        getObjects().setComparator( sPhasedObjectComparator );
+        getPendingObjects().setComparator( sPhasedObjectComparator );
+        this.mSearchDummy = new PhasedObject();
     }
 
     @Override
     public void commitUpdates() {
         super.commitUpdates();
-        if (mDirty) {
-            getObjects().sort(true);
-            mDirty = false;
+        if( this.mDirty ) {
+            getObjects().sort( true );
+            this.mDirty = false;
         }
     }
 
     @Override
-    public void add(BaseObject object) {
+    public void add( final BaseObject object ) {
 
-        if (object instanceof PhasedObject) {
-            super.add(object);
-            mDirty = true;
+        if( object instanceof PhasedObject ) {
+            super.add( object );
+            this.mDirty = true;
         } else {
             // The only reason to restrict PhasedObjectManager to PhasedObjects is so that
             // the PhasedObjectComparator can assume all of its contents are PhasedObjects and
@@ -67,30 +66,32 @@ public class PhasedObjectManager extends ObjectManager {
         }
     }
 
-    public BaseObject find(int phase) {
-        mSearchDummy.setPhase(phase);
-        int index = getObjects().find(mSearchDummy, false);
+    public BaseObject find( final int phase ) {
+        this.mSearchDummy.setPhase( phase );
+        int index = getObjects().find( this.mSearchDummy, false );
         BaseObject result = null;
-        if (index != -1) {
-            result = getObjects().get(index);
+        if( index != -1 ) {
+            result = getObjects().get( index );
         } else {
-            index = getPendingObjects().find(mSearchDummy, false);
-            if (index != -1) {
-                result = getPendingObjects().get(index);
+            index = getPendingObjects().find( this.mSearchDummy, false );
+            if( index != -1 ) {
+                result = getPendingObjects().get( index );
             }
         }
         return result;
     }
 
-    /** Comparator for phased objects. */
-    private static class PhasedObjectComparator implements Comparator<BaseObject>  {
-        public int compare(BaseObject object1, BaseObject object2) {
+    /**
+     * Comparator for phased objects.
+     */
+    private static class PhasedObjectComparator implements Comparator<BaseObject> {
+        public int compare( final BaseObject object1, final BaseObject object2 ) {
             int result = 0;
-            if (object1 != null && object2 != null) {
-                result = ((PhasedObject) object1).phase - ((PhasedObject) object2).phase;
-            } else if (object1 == null && object2 != null) {
+            if( object1 != null && object2 != null ) {
+                result = ( (PhasedObject)object1 ).phase - ( (PhasedObject)object2 ).phase;
+            } else if( object1 == null && object2 != null ) {
                 result = 1;
-            } else if (object2 == null && object1 != null) {
+            } else if( object2 == null && object1 != null ) {
                 result = -1;
             }
             return result;

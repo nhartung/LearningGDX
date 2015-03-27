@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 import com.badlogic.gdx.Gdx;
 
@@ -26,11 +25,12 @@ import com.badlogic.gdx.Gdx;
  */
 public class AllocationGuard {
     public static boolean sGuardActive = false;
+
     public AllocationGuard() {
-        if (sGuardActive) {
+        if( sGuardActive ) {
             // An allocation has occurred while the guard is active!  Report it.
-            Gdx.app.debug("AllocGuard", "An allocation of type " + this.getClass().getName()
-                    + " occurred while the AllocGuard is active.");
+            Gdx.app.debug( "AllocGuard", "An allocation of type " + this.getClass().getName()
+                    + " occurred while the AllocGuard is active." );
 
 
         }

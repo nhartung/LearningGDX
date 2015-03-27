@@ -15,14 +15,14 @@ import nickhartung.utilities.FixedSizeArray;
 public class Renderer {
 
     private ObjectManager mDrawQueue;
-    private Camera        mCamera;
-    private SpriteBatch   mSpriteBatch;
+    private Camera mCamera;
+    private SpriteBatch mSpriteBatch;
     private ShapeRenderer mShapeRenderer;
 
     public void render() {
         final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
 
-        this.mSpriteBatch.setProjectionMatrix(   this.mCamera.combined );
+        this.mSpriteBatch.setProjectionMatrix( this.mCamera.combined );
         this.mShapeRenderer.setProjectionMatrix( this.mCamera.combined );
 
         DrawableObject.DrawableType lastType = DrawableObject.DrawableType.NoType;
@@ -39,13 +39,13 @@ public class Renderer {
             }
             element.mDrawable.draw( element.x, element.y );
         }
-        this.endDrawing(lastType);
+        this.endDrawing( lastType );
     }
 
     public void setDrawQueue( final ObjectManager queue, final Camera pCamera, final SpriteBatch pBatch, final ShapeRenderer pShapeRenderer ) {
-        this.mDrawQueue     = queue;
-        this.mCamera        = pCamera;
-        this.mSpriteBatch   = pBatch;
+        this.mDrawQueue = queue;
+        this.mCamera = pCamera;
+        this.mSpriteBatch = pBatch;
         this.mShapeRenderer = pShapeRenderer;
     }
 

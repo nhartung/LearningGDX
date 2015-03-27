@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 import nickhartung.utilities.FixedSizeArray;
 
@@ -35,111 +34,114 @@ public class ObjectManager extends BaseObject {
 
     public ObjectManager() {
         super();
-        mObjects = new FixedSizeArray<BaseObject>(DEFAULT_ARRAY_SIZE);
-        mPendingAdditions = new FixedSizeArray<BaseObject>(DEFAULT_ARRAY_SIZE);
-        mPendingRemovals = new FixedSizeArray<BaseObject>(DEFAULT_ARRAY_SIZE);
+        this.mObjects = new FixedSizeArray<BaseObject>( DEFAULT_ARRAY_SIZE );
+        this.mPendingAdditions = new FixedSizeArray<BaseObject>( DEFAULT_ARRAY_SIZE );
+        this.mPendingRemovals = new FixedSizeArray<BaseObject>( DEFAULT_ARRAY_SIZE );
     }
 
-    public ObjectManager(int arraySize) {
+    public ObjectManager( final int arraySize ) {
         super();
-        mObjects = new FixedSizeArray<BaseObject>(arraySize);
-        mPendingAdditions = new FixedSizeArray<BaseObject>(arraySize);
-        mPendingRemovals = new FixedSizeArray<BaseObject>(arraySize);
+        this.mObjects = new FixedSizeArray<BaseObject>( arraySize );
+        this.mPendingAdditions = new FixedSizeArray<BaseObject>( arraySize );
+        this.mPendingRemovals = new FixedSizeArray<BaseObject>( arraySize );
     }
 
     @Override
     public void reset() {
         commitUpdates();
-        final int count = mObjects.getCount();
-        for (int i = 0; i < count; i++) {
-            BaseObject object = mObjects.get(i);
+        final int count = this.mObjects.getCount();
+        for( int i = 0; i < count; i++ ) {
+            BaseObject object = this.mObjects.get( i );
             object.reset();
         }
     }
 
     public void commitUpdates() {
-        final int additionCount = mPendingAdditions.getCount();
-        if (additionCount > 0) {
-            final Object[] additionsArray = mPendingAdditions.getArray();
-            for (int i = 0; i < additionCount; i++) {
-                BaseObject object = (BaseObject)additionsArray[i];
-                mObjects.add(object);
+        final int additionCount = this.mPendingAdditions.getCount();
+        if( additionCount > 0 ) {
+            final Object[] additionsArray = this.mPendingAdditions.getArray();
+            for( int i = 0; i < additionCount; i++ ) {
+                BaseObject object = (BaseObject)additionsArray[ i ];
+                this.mObjects.add( object );
             }
-            mPendingAdditions.clear();
+            this.mPendingAdditions.clear();
         }
 
-        final int removalCount = mPendingRemovals.getCount();
-        if (removalCount > 0) {
-            final Object[] removalsArray = mPendingRemovals.getArray();
+        final int removalCount = this.mPendingRemovals.getCount();
+        if( removalCount > 0 ) {
+            final Object[] removalsArray = this.mPendingRemovals.getArray();
 
-            for (int i = 0; i < removalCount; i++) {
-                BaseObject object = (BaseObject)removalsArray[i];
-                mObjects.remove(object, true);
+            for( int i = 0; i < removalCount; i++ ) {
+                BaseObject object = (BaseObject)removalsArray[ i ];
+                this.mObjects.remove( object, true );
             }
-            mPendingRemovals.clear();
+            this.mPendingRemovals.clear();
         }
     }
 
     @Override
-    public void update(float timeDelta, BaseObject parent) {
+    public void update( final float timeDelta, final BaseObject parent ) {
         commitUpdates();
-        final int count = mObjects.getCount();
-        if (count > 0) {
-            final Object[] objectArray = mObjects.getArray();
-            for (int i = 0; i < count; i++) {
-                BaseObject object = (BaseObject)objectArray[i];
-                object.update(timeDelta, this);
+        final int count = this.mObjects.getCount();
+        if( count > 0 ) {
+            final Object[] objectArray = this.mObjects.getArray();
+            for( int i = 0; i < count; i++ ) {
+                BaseObject object = (BaseObject)objectArray[ i ];
+                object.update( timeDelta, this );
             }
         }
     }
 
     public final FixedSizeArray<BaseObject> getObjects() {
-        return mObjects;
+        return this.mObjects;
     }
 
     public final int getCount() {
-        return mObjects.getCount();
+        return this.mObjects.getCount();
     }
 
-    /** Returns the count after the next commitUpdates() is called. */
+    /**
+     * Returns the count after the next commitUpdates() is called.
+     */
     public final int getConcreteCount() {
-        return mObjects.getCount() + mPendingAdditions.getCount() - mPendingRemovals.getCount();
+        return this.mObjects.getCount() + this.mPendingAdditions.getCount() - this.mPendingRemovals.getCount();
     }
 
-    public final BaseObject get(int index) {
-        return mObjects.get(index);
+    public final BaseObject get( final int index ) {
+        return this.mObjects.get( index );
     }
 
-    public void add(BaseObject object) {
-        mPendingAdditions.add(object);
+    public void add( final BaseObject object ) {
+        this.mPendingAdditions.add( object );
     }
 
-    public void remove(BaseObject object) {
-        mPendingRemovals.add(object);
+    public void remove( final BaseObject object ) {
+        this.mPendingRemovals.add( object );
     }
 
     public void removeAll() {
-        final int count = mObjects.getCount();
-        final Object[] objectArray = mObjects.getArray();
-        for (int i = 0; i < count; i++) {
-            mPendingRemovals.add((BaseObject)objectArray[i]);
+        final int count = this.mObjects.getCount();
+        final Object[] objectArray = this.mObjects.getArray();
+        for( int i = 0; i < count; i++ ) {
+            this.mPendingRemovals.add( (BaseObject)objectArray[ i ] );
         }
-        mPendingAdditions.clear();
+        this.mPendingAdditions.clear();
     }
 
     /**
      * Finds a child object by its type.  Note that this may invoke the class loader and therefore
      * may be slow.
+     *
      * @param classObject The class type to search for (e.g. BaseObject.class).
      * @return
      */
-    public <T> T findByClass(Class<T> classObject) {
+    public <T> T findByClass( final Class<T> classObject ) {
         T object = null;
-        final int count = mObjects.getCount();
-        for (int i = 0; i < count; i++) {
-            BaseObject currentObject = mObjects.get(i);
-            if (currentObject.getClass() == classObject) {
-                object = classObject.cast(currentObject);
+        final int count = this.mObjects.getCount();
+        for( int i = 0; i < count; i++ ) {
+            BaseObject currentObject = this.mObjects.get( i );
+            if( currentObject.getClass() == classObject ) {
+                object = classObject.cast( currentObject );
                 break;
             }
         }
@@ -147,7 +149,7 @@ public class ObjectManager extends BaseObject {
     }
 
     protected FixedSizeArray<BaseObject> getPendingObjects() {
-        return mPendingAdditions;
+        return this.mPendingAdditions;
     }
 
 }

@@ -15,10 +15,10 @@ public class CircleShapeDrawable extends ShapeDrawable {
 
     @Override
     public void draw( final float x, final float y ) {
-        assert( this.mColor != null );
+        assert ( this.mColor != null );
         final ShapeRenderer shapeRenderer = ObjectRegistry.sRenderSystem.getShapeRenderer();
         shapeRenderer.setColor( this.mColor );
-        shapeRenderer.circle( x, y, this.mData[DataItems.DataRadius.getValue()], (int)this.mData[DataItems.DataSegments.getValue()] );
+        shapeRenderer.circle( x, y, this.mData[ DataItems.DataRadius.getValue() ], (int)this.mData[ DataItems.DataSegments.getValue() ] );
     }
 
     @Override
@@ -27,7 +27,7 @@ public class CircleShapeDrawable extends ShapeDrawable {
     }
 
     public void set( final float pRadius, int pSegments ) {
-        this.mData[ ShapeDrawable.DataItems.DataRadius.getValue() ]   = pRadius;
+        this.mData[ ShapeDrawable.DataItems.DataRadius.getValue() ] = pRadius;
         this.mData[ ShapeDrawable.DataItems.DataSegments.getValue() ] = pSegments;
     }
 }

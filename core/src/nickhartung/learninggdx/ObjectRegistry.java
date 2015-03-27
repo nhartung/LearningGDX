@@ -8,6 +8,6 @@ import box2dLight.RayHandler;
 public class ObjectRegistry {
 
     public static RenderSystem sRenderSystem;
-    public static RayHandler   sRayHandler;
-    public static InputSystem  sInputSystem;
+    public static RayHandler sRayHandler;
+    public static InputSystem sInputSystem;
 }

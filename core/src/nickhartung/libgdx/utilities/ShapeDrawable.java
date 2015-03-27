@@ -17,9 +17,11 @@ public abstract class ShapeDrawable extends DrawableObject {
         NumDataItems( 6 );
 
         private final int mId;
+
         DataItems( final int pId ) {
             this.mId = pId;
         }
+
         public int getValue() {
             return this.mId;
         }
@@ -36,7 +38,7 @@ public abstract class ShapeDrawable extends DrawableObject {
     public void reset() {
         super.reset();
         for( int i = 0; i < DataItems.NumDataItems.getValue(); i++ ) {
-            mData[ i ] = 0.0f;
+            this.mData[ i ] = 0.0f;
         }
     }
 

@@ -1,7 +1,3 @@
-package nickhartung.libgdx.utilities;
-
-import nickhartung.utilities.FixedSizeArray;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -17,6 +13,9 @@ import nickhartung.utilities.FixedSizeArray;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
+
+import nickhartung.utilities.FixedSizeArray;
 
 /**
  * A general-purpose pool of objects.  Objects in the pool are allocated up front and then
@@ -33,39 +32,45 @@ public abstract class ObjectPool extends BaseObject {
 
     public ObjectPool() {
         super();
-        setSize(DEFAULT_SIZE);
+        setSize( DEFAULT_SIZE );
     }
 
-    public ObjectPool(int size) {
+    public ObjectPool( final int size ) {
         super();
-        setSize(size);
+        setSize( size );
     }
 
     @Override
     public void reset() {
     }
 
-    /** Allocates an object from the pool */
+    /**
+     * Allocates an object from the pool
+     */
     protected Object allocate() {
-        Object result = mAvailable.removeLast();
+        Object result = this.mAvailable.removeLast();
         assert result != null : "Object pool of type " + this.getClass().getSimpleName()
                 + " exhausted!!";
         return result;
     }
 
-    /** Returns an object to the pool. */
-    public void release(Object entry) {
-        mAvailable.add(entry);
+    /**
+     * Returns an object to the pool.
+     */
+    public void release( final Object entry ) {
+        this.mAvailable.add( entry );
     }
 
-    /** Returns the number of pooled elements that have been allocated but not released. */
+    /**
+     * Returns the number of pooled elements that have been allocated but not released.
+     */
     public int getAllocatedCount() {
-        return mAvailable.getCapacity() - mAvailable.getCount();
+        return this.mAvailable.getCapacity() - this.mAvailable.getCount();
     }
 
-    private void setSize(int size) {
+    private void setSize( final int size ) {
         mSize = size;
-        mAvailable = new FixedSizeArray<Object>(mSize);
+        this.mAvailable = new FixedSizeArray<Object>( mSize );
 
         fill();
     }
@@ -73,7 +78,7 @@ public abstract class ObjectPool extends BaseObject {
     protected abstract void fill();
 
     protected FixedSizeArray<Object> getAvailable() {
-        return mAvailable;
+        return this.mAvailable;
     }
 
     protected int getSize() {

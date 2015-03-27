@@ -1,4 +1,3 @@
-package nickhartung.learninggdx;
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -14,6 +13,7 @@ package nickhartung.learninggdx;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.learninggdx;
 
 import nickhartung.libgdx.utilities.BaseObject;
 import nickhartung.libgdx.utilities.Interpolator;
@@ -28,7 +28,7 @@ public class MovementComponent extends GameComponent {
 
     public MovementComponent() {
         super();
-        setPhase(ComponentPhases.MOVEMENT.ordinal());
+        setPhase( ComponentPhases.MOVEMENT.ordinal() );
     }
 
     @Override
@@ -37,24 +37,24 @@ public class MovementComponent extends GameComponent {
     }
 
     @Override
-    public void update(float timeDelta, BaseObject parent) {
-        GameObject object = (GameObject) parent;
+    public void update( final float timeDelta, final BaseObject parent ) {
+        GameObject object = (GameObject)parent;
 
-        sInterpolator.set(object.getVelocity().x, object.getTargetVelocity().x,
-                object.getAcceleration().x);
-        float offsetX = sInterpolator.interpolate(timeDelta);
+        sInterpolator.set( object.getVelocity().x, object.getTargetVelocity().x,
+                           object.getAcceleration().x );
+        float offsetX = sInterpolator.interpolate( timeDelta );
         float newX = object.getPosition().x + offsetX;
         float newVelocityX = sInterpolator.getCurrent();
 
-        sInterpolator.set(object.getVelocity().y, object.getTargetVelocity().y,
-                object.getAcceleration().y);
-        float offsetY = sInterpolator.interpolate(timeDelta);
+        sInterpolator.set( object.getVelocity().y, object.getTargetVelocity().y,
+                           object.getAcceleration().y );
+        float offsetY = sInterpolator.interpolate( timeDelta );
         float newY = object.getPosition().y + offsetY;
         float newVelocityY = sInterpolator.getCurrent();
 
-        object.getPosition().set(newX, newY);
+        object.getPosition().set( newX, newY );
 
-        object.getVelocity().set(newVelocityX, newVelocityY);
+        object.getVelocity().set( newVelocityX, newVelocityY );
     }
 
 }

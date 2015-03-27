@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 /**
  * TObjectPool is a generic version of ObjectPool that automatically casts to type T on
@@ -28,8 +27,8 @@ public abstract class TObjectPool<T> extends ObjectPool {
         super();
     }
 
-    public TObjectPool(int size) {
-        super(size);
+    public TObjectPool( final int size ) {
+        super( size );
     }
 
     public T allocate() {

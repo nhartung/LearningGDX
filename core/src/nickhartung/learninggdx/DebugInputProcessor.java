@@ -8,7 +8,7 @@ import com.badlogic.gdx.InputProcessor;
  */
 public class DebugInputProcessor implements InputProcessor {
     @Override
-    public boolean keyDown(int keycode) {
+    public boolean keyDown( int keycode ) {
         InputSystem input = ObjectRegistry.sInputSystem;
         switch( keycode ) {
             case Input.Keys.DOWN:
@@ -31,7 +31,7 @@ public class DebugInputProcessor implements InputProcessor {
     }
 
     @Override
-    public boolean keyUp(int keycode) {
+    public boolean keyUp( int keycode ) {
         InputSystem input = ObjectRegistry.sInputSystem;
         switch( keycode ) {
             case Input.Keys.DOWN:
@@ -54,32 +54,32 @@ public class DebugInputProcessor implements InputProcessor {
     }
 
     @Override
-    public boolean keyTyped(char character) {
+    public boolean keyTyped( char character ) {
         return false;
     }
 
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    public boolean touchDown( int screenX, int screenY, int pointer, int button ) {
         return false;
     }
 
     @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+    public boolean touchUp( int screenX, int screenY, int pointer, int button ) {
         return false;
     }
 
     @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
+    public boolean touchDragged( int screenX, int screenY, int pointer ) {
         return false;
     }
 
     @Override
-    public boolean mouseMoved(int screenX, int screenY) {
+    public boolean mouseMoved( int screenX, int screenY ) {
         return false;
     }
 
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled( int amount ) {
         return false;
     }
 }

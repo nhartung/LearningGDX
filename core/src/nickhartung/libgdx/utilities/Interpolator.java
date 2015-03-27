@@ -1,5 +1,3 @@
-package nickhartung.libgdx.utilities;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.libgdx.utilities;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.libgdx.utilities;
 
 /**
  * Helper class for interpolating velocity over time given a target velocity and acceleration.
@@ -49,52 +48,51 @@ public class Interpolator extends AllocationGuard {
     // change in position = velocity * time + (0.5 * acceleration * (time^2))
     // change in velocity = acceleration * time
 
-    public void set(float current, float target, float acceleration) {
-        mCurrent = current;
-        mTarget = target;
-        mAcceleration = acceleration;
+    public void set( final float current, final float target, final float acceleration ) {
+        this.mCurrent = current;
+        this.mTarget = target;
+        this.mAcceleration = acceleration;
     }
 
     // While this function writes directly to velocity, it doesn't affect
     // position.  Instead, the position offset is returned so that it can be blended.
-    public float interpolate(float secondsDelta) {
-        float oldVelocity = mCurrent;
+    public float interpolate( final float secondsDelta ) {
+        final float oldVelocity = mCurrent;
 
         // point the acceleration at the target, or zero it if we are already
         // there
-        float directionalAcceleration = calculateAcceleration(oldVelocity, mAcceleration, mTarget);
+        final float directionalAcceleration = calculateAcceleration( oldVelocity, this.mAcceleration, this.mTarget );
 
         // calculate scaled acceleration (0.5 * acceleration * (time^2))
-        float scaledAcceleration;
-        scaledAcceleration = scaleAcceleration(directionalAcceleration, secondsDelta);
+        final float scaledAcceleration = scaleAcceleration( directionalAcceleration, secondsDelta );
 
         // calculate the change in position
-        float positionOffset = (oldVelocity * secondsDelta) + scaledAcceleration;
+        float positionOffset = ( oldVelocity * secondsDelta ) + scaledAcceleration;
 
         // change in velocity = v + aT
-        float newVelocity = oldVelocity + (directionalAcceleration * secondsDelta);
+        float newVelocity = oldVelocity + ( directionalAcceleration * secondsDelta );
 
         // check to see if we've passed our target velocity since the last time
         // step.  If so, clamp to the target
-        if (passedTarget(oldVelocity, newVelocity, mTarget)) {
-            newVelocity = mTarget;
+        if( passedTarget( oldVelocity, newVelocity, this.mTarget ) ) {
+            newVelocity = this.mTarget;
         }
 
-        mCurrent = newVelocity;
+        this.mCurrent = newVelocity;
 
         return positionOffset;
     }
 
     public float getCurrent() {
-        return mCurrent;
+        return this.mCurrent;
     }
 
-    private boolean passedTarget(float oldVelocity, float newVelocity, float targetVelocity) {
+    private boolean passedTarget( final float oldVelocity, final float newVelocity, final float targetVelocity ) {
         boolean result = false;
 
-        if (oldVelocity < targetVelocity && newVelocity > targetVelocity) {
+        if( oldVelocity < targetVelocity && newVelocity > targetVelocity ) {
             result = true;
-        } else if (oldVelocity > targetVelocity && newVelocity < targetVelocity) {
+        } else if( oldVelocity > targetVelocity && newVelocity < targetVelocity ) {
             result = true;
         }
 
@@ -103,21 +101,22 @@ public class Interpolator extends AllocationGuard {
 
     // find the magnitude and direction of acceleration.
     // in this system, acceleration always points toward target velocity
-    private float calculateAcceleration(float velocity, float acceleration, float target) {
-        if (Math.abs(velocity - target) < 0.0001f) {
+    private float calculateAcceleration( final float velocity, final float acceleration, final float target ) {
+        float retAcceleration = acceleration;
+        if( Math.abs( velocity - target ) < 0.0001f ) {
             // no accel needed
-            acceleration = 0.0f;
-        } else if (velocity > target) {
+            retAcceleration = 0.0f;
+        } else if( velocity > target ) {
             // accel must be negative
-            acceleration *= -1.0f;
+            retAcceleration = acceleration * -1.0f;
         }
 
-        return acceleration;
+        return retAcceleration;
     }
 
     // calculates 1/2 aT^2
-    private float scaleAcceleration(float acceleration, float secondsDelta) {
-        float timeSquared = (secondsDelta * secondsDelta);
+    private float scaleAcceleration( final float acceleration, final float secondsDelta ) {
+        final float timeSquared = ( secondsDelta * secondsDelta );
         float scaledAccel = acceleration * timeSquared;
         scaledAccel *= 0.5f;
 

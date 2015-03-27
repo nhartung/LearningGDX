@@ -1,5 +1,3 @@
-package nickhartung.learninggdx;
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -15,6 +13,7 @@ package nickhartung.learninggdx;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nickhartung.learninggdx;
 
 import nickhartung.libgdx.utilities.PhasedObject;
 

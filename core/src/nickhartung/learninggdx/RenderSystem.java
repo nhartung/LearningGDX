@@ -25,8 +25,8 @@ public class RenderSystem {
     private ObjectManager[] mRenderQueues;
     private int mQueueIndex;
 
-    private Camera        mCamera;
-    private SpriteBatch   mSpriteBatch;
+    private Camera mCamera;
+    private SpriteBatch mSpriteBatch;
     private ShapeRenderer mShapeRenderer;
 
     public RenderSystem() {
@@ -40,37 +40,37 @@ public class RenderSystem {
     }
 
     public void scheduleForDraw( final DrawableObject object, final Vector2 position, final int priority ) {
-        RenderElement element = mElementPool.allocate();
-        if ( element != null ) {
+        RenderElement element = this.mElementPool.allocate();
+        if( element != null ) {
             element.set( object, position, priority );
-            mRenderQueues[ mQueueIndex ].add( element );
+            this.mRenderQueues[ this.mQueueIndex ].add( element );
         }
     }
 
-    private void clearQueue(FixedSizeArray<BaseObject> objects) {
+    private void clearQueue( final FixedSizeArray<BaseObject> objects ) {
         final int count = objects.getCount();
         final Object[] objectArray = objects.getArray();
-        final RenderElementPool elementPool = mElementPool;
-        for (int i = count - 1; i >= 0; i--) {
-            RenderElement element = (RenderElement)objectArray[i];
-            elementPool.release(element);
+        final RenderElementPool elementPool = this.mElementPool;
+        for( int i = count - 1; i >= 0; i-- ) {
+            RenderElement element = (RenderElement)objectArray[ i ];
+            elementPool.release( element );
             objects.removeLast();
         }
     }
 
     public void swap( final Renderer pRenderer, final Camera pCamera ) {
-        mRenderQueues[mQueueIndex].commitUpdates();
+        this.mRenderQueues[ this.mQueueIndex ].commitUpdates();
 
         // This code will block if the previous queue is still being executed.
-        pRenderer.setDrawQueue( this.mRenderQueues[ mQueueIndex] , pCamera, this.mSpriteBatch, this.mShapeRenderer );
+        pRenderer.setDrawQueue( this.mRenderQueues[ this.mQueueIndex ], pCamera, this.mSpriteBatch, this.mShapeRenderer );
 
-        final int lastQueue = ( mQueueIndex == 0 ) ? NUM_DRAW_QUEUES - 1 : mQueueIndex - 1;
+        final int lastQueue = ( this.mQueueIndex == 0 ) ? NUM_DRAW_QUEUES - 1 : this.mQueueIndex - 1;
 
         // Clear the old queue.
-        FixedSizeArray<BaseObject> objects = mRenderQueues[ lastQueue ].getObjects();
+        FixedSizeArray<BaseObject> objects = this.mRenderQueues[ lastQueue ].getObjects();
         clearQueue( objects );
 
-        mQueueIndex = (mQueueIndex + 1) % NUM_DRAW_QUEUES;
+        this.mQueueIndex = ( this.mQueueIndex + 1 ) % NUM_DRAW_QUEUES;
     }
 
     public void setCamera( final Camera pCamera ) {
@@ -107,11 +107,11 @@ public class RenderSystem {
             super();
         }
 
-        public void set( DrawableObject drawable, Vector2 position, int priority ) {
+        public void set( final DrawableObject drawable, final Vector2 position, final int priority ) {
             this.mDrawable = drawable;
             x = position.x;
             y = position.y;
-            this.setPhase(priority * 100 + this.mDrawable.getType().ordinal());
+            this.setPhase( priority * 100 + this.mDrawable.getType().ordinal() );
         }
 
         public void reset() {
@@ -123,22 +123,22 @@ public class RenderSystem {
 
     protected class RenderElementPool extends TObjectPool<RenderElement> {
 
-        RenderElementPool(int max) {
-            super(max);
+        RenderElementPool( final int max ) {
+            super( max );
         }
 
         @Override
-        public void release(Object element) {
-            RenderElement renderable = (RenderElement)element;
+        public void release( final Object element ) {
+            final RenderElement renderable = (RenderElement)element;
             // reset on release
             renderable.reset();
-            super.release(element);
+            super.release( element );
         }
 
         @Override
         protected void fill() {
-            for (int x = 0; x < getSize(); x++) {
-                this.getAvailable().add(new RenderElement());
+            for( int x = 0; x < getSize(); x++ ) {
+                this.getAvailable().add( new RenderElement() );
             }
         }
     }
