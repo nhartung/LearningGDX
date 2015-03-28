@@ -23,6 +23,21 @@ public class DebugInputProcessor implements InputProcessor {
             case Input.Keys.RIGHT:
                 input.setMoveRight( true );
                 break;
+            case Input.Keys.A:
+                input.setA( true );
+                break;
+            case Input.Keys.R:
+                input.setR( true );
+                break;
+            case Input.Keys.G:
+                input.setG( true );
+                break;
+            case Input.Keys.B:
+                input.setB( true );
+                break;
+            case Input.Keys.V:
+                input.setV( true );
+                break;
             default:
                 // Do nothing
                 break;
@@ -45,6 +60,21 @@ public class DebugInputProcessor implements InputProcessor {
                 break;
             case Input.Keys.RIGHT:
                 input.setMoveRight( false );
+                break;
+            case Input.Keys.A:
+                input.setA( false );
+                break;
+            case Input.Keys.R:
+                input.setR( false );
+                break;
+            case Input.Keys.G:
+                input.setG( false );
+                break;
+            case Input.Keys.B:
+                input.setB( false );
+                break;
+            case Input.Keys.V:
+                input.setV( false );
                 break;
             default:
                 // Do nothing

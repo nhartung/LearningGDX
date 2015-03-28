@@ -8,19 +8,25 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import box2dLight.Light;
 import box2dLight.PointLight;
 import box2dLight.RayHandler;
 import nickhartung.libgdx.render.BoxShapeDrawable;
 import nickhartung.libgdx.render.CircleShapeDrawable;
 import nickhartung.libgdx.render.RenderSystem;
 import nickhartung.libgdx.render.Renderer;
-import nickhartung.libgdx.utilities.ObjectManager;
 import nickhartung.libgdx.render.SpriteDrawable;
+import nickhartung.libgdx.utilities.ObjectManager;
 
 public class GDXTop extends ApplicationAdapter {
     SpriteBatch batch;
@@ -39,6 +45,47 @@ public class GDXTop extends ApplicationAdapter {
     private GameObject test4;
     private ObjectManager manager;
 
+    private float      mModifier;
+    private boolean    mlastV;
+    private Light pt;
+
+    static public ShaderProgram createDefaultShader () {
+        String vertexShader = "#version 330\n"
+                + "in vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+                + "in vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+                + "in vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+                + "uniform mat4 u_projTrans;\n" //
+                + "out vec4 v_color;\n" //
+                + "out vec2 v_texCoords;\n" //
+                + "\n" //
+                + "void main()\n" //
+                + "{\n" //
+                + "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+                + "   v_color.a = v_color.a * (255.0/254.0);\n" //
+                + "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+                + "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+                + "}\n";
+        String fragmentShader = "#version 330 core\n"
+                + "#ifdef GL_ES\n" //
+                + "#define LOWP lowp\n" //
+                + "precision mediump float;\n" //
+                + "#else\n" //
+                + "#define LOWP \n" //
+                + "#endif\n" //
+                + "in LOWP vec4 v_color;\n" //
+                + "in vec2 v_texCoords;\n" //
+                + "out vec4 fragColor;\n" //
+                + "uniform sampler2D u_texture;\n" //
+                + "void main()\n"//
+                + "{\n" //
+                + "  fragColor = v_color * texture(u_texture, v_texCoords);\n" //
+                + "}";
+
+        ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
+        if (shader.isCompiled() == false) throw new IllegalArgumentException("Error compiling shader: " + shader.getLog());
+        return shader;
+    }
+
     @Override
     public void create() {
         this.mCamera = new OrthographicCamera();
@@ -52,6 +99,7 @@ public class GDXTop extends ApplicationAdapter {
         this.mSprite.setSize( 100.0f, 100.0f );
 
         this.mRenderer = new Renderer();
+        //this.mSpriteBatch = new SpriteBatch( 1000, createDefaultShader() );
         this.mSpriteBatch = new SpriteBatch();
         this.mShapeRenderer = new ShapeRenderer();
 
@@ -64,9 +112,39 @@ public class GDXTop extends ApplicationAdapter {
         World world = new World( new Vector2( 0, 0 ), true );
         RayHandler rayHandler = new RayHandler( world );
         rayHandler.setCulling( true );
+        rayHandler.setShadows( true );
         rayHandler.useDiffuseLight( true );
-        rayHandler.setAmbientLight( 0.2f, 0.2f, 0.2f, 1.0f );
+        rayHandler.setAmbientLight( 0.0f, 0.0f, 0.0f, 1.0f );
+        rayHandler.setBlur( false );
+        //rayHandler.setBlur( true );
+        //rayHandler.setBlurNum( 50 );
         ObjectRegistry.rayHandler = rayHandler;
+
+        // Box2d ~~~~~~~~~~~~~~~~~~~~~~
+// Create our body definition
+        BodyDef groundBodyDef = new BodyDef();
+// Set its world position
+        groundBodyDef.position.set(new Vector2(150.0f, 150.0f));
+
+// Create a body from the defintion and add it to the world
+        Body groundBody = world.createBody(groundBodyDef);
+
+// Create a polygon shape
+        PolygonShape groundBox = new PolygonShape();
+// Set the polygon shape as a box which is twice the size of our view port and 20 high
+// (setAsBox takes half-width and half-height as arguments)
+        groundBox.setAsBox( 50.0f, 50.0f );
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = groundBox;
+        fixtureDef.filter.groupIndex = 0;
+// Create a fixture from our polygon shape and add it to our ground body
+        groundBody.createFixture( fixtureDef );
+// Clean up after ourselves
+        groundBox.dispose();
+
+
+        ////////////////////////////////////
 
         InputSystem inputSystem = new InputSystem();
         ObjectRegistry.inputSystem = inputSystem;
@@ -80,7 +158,25 @@ public class GDXTop extends ApplicationAdapter {
         SpriteDrawable spriteDrawable = new SpriteDrawable();
         spriteDrawable.setSprite( sprite1 );
         renderCom.setDrawable( spriteDrawable );
-        renderCom.setPriority( 1 );
+        renderCom.setPriority( 2 );
+
+        Sprite backgroundSprite = new Sprite( new Texture( "background.jpg" ) );
+        backgroundSprite.setSize( 960.0f, 540.0f );
+        //backgroundSprite.setColor( 0.0f, 0.0f, 0.0f, 1.0f );
+        RenderComponent renderBackground = new RenderComponent();
+        SpriteDrawable backgroundDrawable = new SpriteDrawable();
+        backgroundDrawable.setSprite( backgroundSprite );
+        renderBackground.setDrawable( backgroundDrawable );
+        renderBackground.setPriority( 0 );
+
+        Sprite playerSprite = new Sprite( new Texture( "black.jpg") );
+        playerSprite.setSize( 200.0f, 200.0f );
+        playerSprite.setColor( 1.0f, 1.0f, 1.0f, 1.0f );
+        SpriteDrawable playerDrawable = new SpriteDrawable();
+        playerDrawable.setSprite( playerSprite );
+        RenderComponent renderPlayer = new RenderComponent();
+        renderPlayer.setDrawable( playerDrawable );
+        renderPlayer.setPriority( 1 );
 
         Color red = new Color();
         red.set( 1.0f, 0.0f, 0.0f, 1.0f );
@@ -114,14 +210,19 @@ public class GDXTop extends ApplicationAdapter {
         movement.shared = true;
 
         TestMovementComponent testComp = new TestMovementComponent();
-        testComp.setMovementSpeed( 100.0f, 50.0f );
+        testComp.setMovementSpeed( 300.0f, 300.0f * 60.0f );
 
-        PointLight pt = new PointLight( rayHandler, 5, new Color( 1.0f, 1.0f, 1.0f, 1.0f ), 30, 50.0f, 50.0f );
+        this.pt = new PointLight( rayHandler, 128, new Color( 0.0f, 0.0f, 0.0f, 1.0f ), 500.0f, 0.0f, 0.0f );
+        this.pt.setSoft( true );
+        this.pt.setSoftnessLength( 200.0f );
+        //this.pt = new ConeLight( rayHandler, 128, new Color( 0.0f, 0.0f, 0.0f, 1.0f ), 500.0f, 0.0f, 0.0f, 0.0f, 180.0f );
+        //this.pt.setXray( true );
+        this.mModifier = 1.0f;
         //pt.setStaticLight(true);
 
         LightComponent lightCom = new LightComponent();
         lightCom.setLight( pt );
-        lightCom.setOffset( 50.0f, 50.0f );
+        lightCom.setOffset( 100.0f, 100.0f );
 
         Sprite one = new Sprite( new Texture( "one.jpg" ) );
         one.setSize( 100.0f, 100.0f );
@@ -184,15 +285,20 @@ public class GDXTop extends ApplicationAdapter {
         TestAnimationComponent testAnimation = new TestAnimationComponent();
         testAnimation.setAnimation( animationComponent );
 
+        GameObject background = new GameObject();
+        background.setCurrentAction( GameObject.ActionType.IDLE );
+        background.add( renderBackground );
+        background.setPosition( new Vector2( 0.0f, 0.0f ) );
+
         test = new GameObject();
         test.setCurrentAction( GameObject.ActionType.IDLE );
-        //test.add( renderCom );
+        //test.add( renderPlayer );
         test.add( movement );
         test.add( testComp );
         test.add( lightCom );
-        test.add( animRenderer );
-        test.add( animationComponent );
-        test.add( testAnimation );
+        //test.add( animRenderer );
+        //test.add( animationComponent );
+        //test.add( testAnimation );
         test.setPosition( test.getPosition().add( 0.0f, 0.0f ) );
 
         test2 = new GameObject();
@@ -208,6 +314,7 @@ public class GDXTop extends ApplicationAdapter {
         test4.setPosition( test4.getPosition().add( 100.0f, 100.0f ) );
 
         manager = new ObjectManager( 64 );
+        manager.add( background );
         manager.add( test );
         manager.add( test2 );
         manager.add( test3 );
@@ -223,8 +330,39 @@ public class GDXTop extends ApplicationAdapter {
         Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
         final RenderSystem renderSystem = ObjectRegistry.renderSystem;
         final RayHandler rayHandler = ObjectRegistry.rayHandler;
+        final InputSystem inputSystem = ObjectRegistry.inputSystem;
 
         manager.update( Gdx.graphics.getDeltaTime(), null );
+
+        if( !this.mlastV && inputSystem.getV() ) {
+            this.mModifier *= -1;
+        }
+        this.mlastV = inputSystem.getV();
+        if( inputSystem.getA() ) {
+            this.pt.setColor( Math.max( Math.min( this.pt.getColor().r + ( 0.1f * this.mModifier ), 1.0f ), 0.0f ),
+                              Math.max( Math.min( this.pt.getColor().b + ( 0.1f * this.mModifier ), 1.0f ), 0.0f ),
+                              Math.max( Math.min( this.pt.getColor().g + ( 0.1f * this.mModifier ), 1.0f ), 0.0f ),
+                              1.0f );
+        }
+        if( inputSystem.getR() ) {
+            this.pt.setColor( Math.max( Math.min( this.pt.getColor().r + ( 0.1f * this.mModifier ), 1.0f ), 0.0f ),
+                              this.pt.getColor().g,
+                              this.pt.getColor().b,
+                              1.0f );
+        }
+        if( inputSystem.getG() ) {
+            this.pt.setColor( this.pt.getColor().r,
+                              Math.max( Math.min( this.pt.getColor().g + ( 0.1f * this.mModifier ), 1.0f ), 0.0f ),
+                              this.pt.getColor().b,
+                              1.0f );
+        }
+        if( inputSystem.getB() ) {
+            this.pt.setColor( this.pt.getColor().r,
+                              this.pt.getColor().g,
+                              Math.max( Math.min( this.pt.getColor().b + ( 0.1f * this.mModifier ), 1.0f ), 0.0f ),
+                              1.0f );
+        }
+
         renderSystem.swap( mRenderer, mCamera );
         mRenderer.render();
         rayHandler.setCombinedMatrix( this.mCamera.combined );
