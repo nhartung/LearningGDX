@@ -22,7 +22,7 @@ public class LightComponent extends GameComponent {
         assert ( parent != null );
         final GameObject object = (GameObject)parent;
         final GameObject.ActionType action = object.getCurrentAction();
-        if( action == GameObject.ActionType.ACTIVE ) {
+        if( action != GameObject.ActionType.INVALID ) {
             final Vector2 position = object.getPosition();
             this.mLight.setPosition( position.x + this.mOffset.x, position.y + this.mOffset.y );
             this.mLight.setActive( true );

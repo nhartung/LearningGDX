@@ -123,12 +123,76 @@ public class GDXTop extends ApplicationAdapter {
         lightCom.setLight( pt );
         lightCom.setOffset( 50.0f, 50.0f );
 
+        Sprite one = new Sprite( new Texture( "one.jpg" ) );
+        one.setSize( 100.0f, 100.0f );
+
+        SpriteDrawable oneDrawable = new SpriteDrawable();
+        oneDrawable.setSprite( one );
+
+        Sprite two = new Sprite( new Texture( "two.jpg" ) );
+        two.setSize( 100.0f, 100.0f );
+
+        SpriteDrawable twoDrawable = new SpriteDrawable();
+        twoDrawable.setSprite( two );
+
+        Sprite three = new Sprite( new Texture( "three.jpg" ) );
+        three.setSize( 100.0f, 100.0f );
+
+        SpriteDrawable threeDrawable = new SpriteDrawable();
+        threeDrawable.setSprite( three );
+
+        Sprite four = new Sprite( new Texture( "four.jpg" ) );
+        four.setSize( 100.0f, 100.0f );
+
+        SpriteDrawable fourDrawable = new SpriteDrawable();
+        fourDrawable.setSprite( four );
+
+        Sprite five = new Sprite( new Texture( "five.jpg" ) );
+        five.setSize( 100.0f, 100.0f );
+
+        SpriteDrawable fiveDrawable = new SpriteDrawable();
+        fiveDrawable.setSprite( five );
+
+        AnimationFrame idleFrame   = new AnimationFrame( spriteDrawable,   0.5f );
+
+        AnimationFrame oneFrame   = new AnimationFrame( oneDrawable,   0.5f );
+        AnimationFrame twoFrame   = new AnimationFrame( twoDrawable,   0.5f );
+        AnimationFrame threeFrame = new AnimationFrame( threeDrawable, 0.5f );
+        AnimationFrame fourFrame  = new AnimationFrame( fourDrawable,  0.5f );
+        AnimationFrame fiveFrame  = new AnimationFrame( fiveDrawable,  0.5f );
+
+        Animation animationMove = new Animation( GameObject.ActionType.MOVE.ordinal(), 5 );
+        animationMove.setLoop( true );
+        animationMove.addFrame( oneFrame );
+        animationMove.addFrame( twoFrame );
+        animationMove.addFrame( threeFrame );
+        animationMove.addFrame( fourFrame );
+        animationMove.addFrame( fiveFrame );
+
+        Animation animationIdle = new Animation( GameObject.ActionType.IDLE.ordinal(), 1 );
+        animationIdle.setLoop( false );
+        animationIdle.addFrame( idleFrame );
+
+        RenderComponent animRenderer = new RenderComponent();
+        animRenderer.setPriority( 0 );
+
+        AnimationComponent animationComponent = new AnimationComponent();
+        animationComponent.addAnimation( animationIdle );
+        animationComponent.addAnimation( animationMove );
+        animationComponent.setRenderComponent( animRenderer );
+
+        TestAnimationComponent testAnimation = new TestAnimationComponent();
+        testAnimation.setAnimation( animationComponent );
+
         test = new GameObject();
-        test.setCurrentAction( GameObject.ActionType.ACTIVE );
-        test.add( renderCom );
+        test.setCurrentAction( GameObject.ActionType.IDLE );
+        //test.add( renderCom );
         test.add( movement );
         test.add( testComp );
         test.add( lightCom );
+        test.add( animRenderer );
+        test.add( animationComponent );
+        test.add( testAnimation );
         test.setPosition( test.getPosition().add( 0.0f, 0.0f ) );
 
         test2 = new GameObject();
