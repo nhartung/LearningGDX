@@ -1,4 +1,4 @@
-package nickhartung.libgdx.utilities;
+package nickhartung.libgdx.render;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -16,7 +16,7 @@ public class BoxShapeDrawable extends ShapeDrawable {
     @Override
     public void draw( final float x, final float y ) {
         assert ( this.mColor != null );
-        final ShapeRenderer shapeRenderer = ObjectRegistry.sRenderSystem.getShapeRenderer();
+        final ShapeRenderer shapeRenderer = ObjectRegistry.renderSystem.getShapeRenderer();
         shapeRenderer.setColor( this.mColor );
         shapeRenderer.box( x, y, this.mData[ DataItems.DataZ.getValue() ], this.mData[ DataItems.DataWidth.getValue() ],
                 this.mData[ DataItems.DataHeight.getValue() ], this.mData[ DataItems.DataDepth.getValue() ] );

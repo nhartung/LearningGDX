@@ -1,4 +1,4 @@
-package nickhartung.libgdx.utilities;
+package nickhartung.libgdx.render;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;

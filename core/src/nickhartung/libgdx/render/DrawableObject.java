@@ -1,4 +1,6 @@
-package nickhartung.libgdx.utilities;
+package nickhartung.libgdx.render;
+
+import nickhartung.libgdx.utilities.BaseObject;
 
 /**
  * Created by Nick on 3/16/2015.

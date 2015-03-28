@@ -9,7 +9,7 @@ import com.badlogic.gdx.InputProcessor;
 public class DebugInputProcessor implements InputProcessor {
     @Override
     public boolean keyDown( int keycode ) {
-        InputSystem input = ObjectRegistry.sInputSystem;
+        InputSystem input = ObjectRegistry.inputSystem;
         switch( keycode ) {
             case Input.Keys.DOWN:
                 input.setMoveDown( true );
@@ -32,7 +32,7 @@ public class DebugInputProcessor implements InputProcessor {
 
     @Override
     public boolean keyUp( int keycode ) {
-        InputSystem input = ObjectRegistry.sInputSystem;
+        InputSystem input = ObjectRegistry.inputSystem;
         switch( keycode ) {
             case Input.Keys.DOWN:
                 input.setMoveDown( false );

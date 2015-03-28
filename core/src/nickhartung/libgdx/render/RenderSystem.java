@@ -1,4 +1,4 @@
-package nickhartung.learninggdx;
+package nickhartung.libgdx.render;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 import nickhartung.libgdx.utilities.BaseObject;
-import nickhartung.libgdx.utilities.DrawableObject;
 import nickhartung.libgdx.utilities.ObjectManager;
 import nickhartung.libgdx.utilities.PhasedObject;
 import nickhartung.libgdx.utilities.PhasedObjectManager;
@@ -29,20 +28,24 @@ public class RenderSystem {
     private SpriteBatch mSpriteBatch;
     private ShapeRenderer mShapeRenderer;
 
-    public RenderSystem() {
+    public RenderSystem( final int pNumDrawQueues, final int pQueueSize ) {
         super();
-        this.mElementPool = new RenderElementPool( NUM_DRAW_QUEUES * QUEUE_SIZE );
-        this.mRenderQueues = new ObjectManager[ NUM_DRAW_QUEUES ];
-        for( int i = 0; i < NUM_DRAW_QUEUES; i++ ) {
-            this.mRenderQueues[ i ] = new PhasedObjectManager( QUEUE_SIZE );
+        this.mElementPool = new RenderElementPool( pNumDrawQueues * pQueueSize );
+        this.mRenderQueues = new ObjectManager[ pNumDrawQueues ];
+        for( int i = 0; i < pNumDrawQueues; i++ ) {
+            this.mRenderQueues[ i ] = new PhasedObjectManager( pQueueSize );
         }
         this.mQueueIndex = 0;
     }
 
-    public void scheduleForDraw( final DrawableObject object, final Vector2 position, final int priority ) {
+    public RenderSystem() {
+        this( NUM_DRAW_QUEUES, QUEUE_SIZE );
+    }
+
+    public void scheduleForDraw( final DrawableObject pObject, final Vector2 pPosition, final int pPriority ) {
         RenderElement element = this.mElementPool.allocate();
         if( element != null ) {
-            element.set( object, position, priority );
+            element.set( pObject, pPosition, pPriority );
             this.mRenderQueues[ this.mQueueIndex ].add( element );
         }
     }

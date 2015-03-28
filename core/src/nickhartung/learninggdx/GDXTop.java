@@ -15,10 +15,12 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import box2dLight.PointLight;
 import box2dLight.RayHandler;
-import nickhartung.libgdx.utilities.BoxShapeDrawable;
-import nickhartung.libgdx.utilities.CircleShapeDrawable;
+import nickhartung.libgdx.render.BoxShapeDrawable;
+import nickhartung.libgdx.render.CircleShapeDrawable;
+import nickhartung.libgdx.render.RenderSystem;
+import nickhartung.libgdx.render.Renderer;
 import nickhartung.libgdx.utilities.ObjectManager;
-import nickhartung.libgdx.utilities.SpriteDrawable;
+import nickhartung.libgdx.render.SpriteDrawable;
 
 public class GDXTop extends ApplicationAdapter {
     SpriteBatch batch;
@@ -57,17 +59,17 @@ public class GDXTop extends ApplicationAdapter {
         render.setCamera( this.mCamera );
         render.setSpriteBatch( this.mSpriteBatch );
         render.setShapeRenderer( this.mShapeRenderer );
-        ObjectRegistry.sRenderSystem = render;
+        ObjectRegistry.renderSystem = render;
 
         World world = new World( new Vector2( 0, 0 ), true );
         RayHandler rayHandler = new RayHandler( world );
         rayHandler.setCulling( true );
         rayHandler.useDiffuseLight( true );
         rayHandler.setAmbientLight( 0.2f, 0.2f, 0.2f, 1.0f );
-        ObjectRegistry.sRayHandler = rayHandler;
+        ObjectRegistry.rayHandler = rayHandler;
 
         InputSystem inputSystem = new InputSystem();
-        ObjectRegistry.sInputSystem = inputSystem;
+        ObjectRegistry.inputSystem = inputSystem;
 
         Gdx.input.setInputProcessor( new DebugInputProcessor() );
 
@@ -155,8 +157,8 @@ public class GDXTop extends ApplicationAdapter {
 
         Gdx.gl.glClearColor( 0, 0, 0, 1 );
         Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
-        final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
-        final RayHandler rayHandler = ObjectRegistry.sRayHandler;
+        final RenderSystem renderSystem = ObjectRegistry.renderSystem;
+        final RayHandler rayHandler = ObjectRegistry.rayHandler;
 
         manager.update( Gdx.graphics.getDeltaTime(), null );
         renderSystem.swap( mRenderer, mCamera );

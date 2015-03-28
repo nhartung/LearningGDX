@@ -1,4 +1,4 @@
-package nickhartung.libgdx.utilities;
+package nickhartung.libgdx.render;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,7 +19,7 @@ public class SpriteDrawable extends DrawableObject {
     @Override
     public void draw( final float x, final float y ) {
         assert ( this.mSprite != null );
-        SpriteBatch batch = ObjectRegistry.sRenderSystem.getSpriteBatch();
+        SpriteBatch batch = ObjectRegistry.renderSystem.getSpriteBatch();
         this.mSprite.setPosition( x, y );
         this.mSprite.draw( batch );
     }

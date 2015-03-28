@@ -27,7 +27,7 @@ public class TestMovementComponent extends GameComponent {
         float targetX = 0.0f;
         float targetY = 0.0f;
         GameObject parentObject = (GameObject)parent;
-        InputSystem input = ObjectRegistry.sInputSystem;
+        InputSystem input = ObjectRegistry.inputSystem;
         parentObject.getAcceleration().set( this.mAcceleration, this.mAcceleration );
         if( input.moveUp() ) {
             targetY = this.mMaxSpeed;

@@ -1,11 +1,10 @@
-package nickhartung.learninggdx;
+package nickhartung.libgdx.render;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import nickhartung.libgdx.utilities.BaseObject;
-import nickhartung.libgdx.utilities.DrawableObject;
 import nickhartung.libgdx.utilities.ObjectManager;
 import nickhartung.utilities.FixedSizeArray;
 
@@ -20,8 +19,6 @@ public class Renderer {
     private ShapeRenderer mShapeRenderer;
 
     public void render() {
-        final RenderSystem renderSystem = ObjectRegistry.sRenderSystem;
-
         this.mSpriteBatch.setProjectionMatrix( this.mCamera.combined );
         this.mShapeRenderer.setProjectionMatrix( this.mCamera.combined );
 
