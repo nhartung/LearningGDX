@@ -24,9 +24,8 @@ public class RenderSystem {
     private ObjectManager[] mRenderQueues;
     private int mQueueIndex;
 
-    private Camera mCamera;
-    private SpriteBatch mSpriteBatch;
-    private ShapeRenderer mShapeRenderer;
+    private static SpriteBatch mSpriteBatch;
+    private static ShapeRenderer mShapeRenderer;
 
     public RenderSystem( final int pNumDrawQueues, final int pQueueSize ) {
         super();
@@ -40,6 +39,11 @@ public class RenderSystem {
 
     public RenderSystem() {
         this( NUM_DRAW_QUEUES, QUEUE_SIZE );
+    }
+
+    public static void setRenderers( final SpriteBatch pSpriteBatch, final ShapeRenderer pShapeRenderer ) {
+        RenderSystem.mSpriteBatch   = pSpriteBatch;
+        RenderSystem.mShapeRenderer = pShapeRenderer;
     }
 
     public void scheduleForDraw( final DrawableObject pObject, final Vector2 pPosition, final int pPriority ) {
@@ -65,7 +69,7 @@ public class RenderSystem {
         this.mRenderQueues[ this.mQueueIndex ].commitUpdates();
 
         // This code will block if the previous queue is still being executed.
-        pRenderer.setDrawQueue( this.mRenderQueues[ this.mQueueIndex ], pCamera, this.mSpriteBatch, this.mShapeRenderer );
+        pRenderer.setDrawQueue( this.mRenderQueues[ this.mQueueIndex ], pCamera );
 
         final int lastQueue = ( this.mQueueIndex == 0 ) ? NUM_DRAW_QUEUES - 1 : this.mQueueIndex - 1;
 
@@ -76,28 +80,12 @@ public class RenderSystem {
         this.mQueueIndex = ( this.mQueueIndex + 1 ) % NUM_DRAW_QUEUES;
     }
 
-    public void setCamera( final Camera pCamera ) {
-        this.mCamera = pCamera;
+    public static SpriteBatch getSpriteBatch() {
+        return RenderSystem.mSpriteBatch;
     }
 
-    public Camera getCamera() {
-        return this.mCamera;
-    }
-
-    public void setSpriteBatch( final SpriteBatch pBatch ) {
-        this.mSpriteBatch = pBatch;
-    }
-
-    public void setShapeRenderer( final ShapeRenderer pShapeRenderer ) {
-        this.mShapeRenderer = pShapeRenderer;
-    }
-
-    public SpriteBatch getSpriteBatch() {
-        return this.mSpriteBatch;
-    }
-
-    public ShapeRenderer getShapeRenderer() {
-        return this.mShapeRenderer;
+    public static ShapeRenderer getShapeRenderer() {
+        return RenderSystem.mShapeRenderer;
     }
 
     public class RenderElement extends PhasedObject {

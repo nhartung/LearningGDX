@@ -33,10 +33,7 @@ public class ObjectManager extends BaseObject {
     private FixedSizeArray<BaseObject> mPendingRemovals;
 
     public ObjectManager() {
-        super();
-        this.mObjects = new FixedSizeArray<BaseObject>( DEFAULT_ARRAY_SIZE );
-        this.mPendingAdditions = new FixedSizeArray<BaseObject>( DEFAULT_ARRAY_SIZE );
-        this.mPendingRemovals = new FixedSizeArray<BaseObject>( DEFAULT_ARRAY_SIZE );
+        this( DEFAULT_ARRAY_SIZE );
     }
 
     public ObjectManager( final int arraySize ) {

@@ -3,8 +3,6 @@ package nickhartung.libgdx.render;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import nickhartung.learninggdx.ObjectRegistry;
-
 /**
  * Created by Nick on 3/19/2015.
  */
@@ -13,15 +11,16 @@ public class SpriteDrawable extends DrawableObject {
     private Sprite mSprite;
 
     public SpriteDrawable() {
+        super();
         this.mType = DrawableType.Sprite;
     }
 
     @Override
     public void draw( final float x, final float y ) {
         assert ( this.mSprite != null );
-        SpriteBatch batch = ObjectRegistry.renderSystem.getSpriteBatch();
+        final SpriteBatch spriteBatch = RenderSystem.getSpriteBatch();
         this.mSprite.setPosition( x, y );
-        this.mSprite.draw( batch );
+        this.mSprite.draw( spriteBatch );
     }
 
     @Override

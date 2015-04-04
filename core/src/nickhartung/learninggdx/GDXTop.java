@@ -8,12 +8,18 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -49,42 +55,9 @@ public class GDXTop extends ApplicationAdapter {
     private boolean    mlastV;
     private Light pt;
 
-    static public ShaderProgram createDefaultShader () {
-        String vertexShader = "#version 330\n"
-                + "in vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-                + "in vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-                + "in vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-                + "uniform mat4 u_projTrans;\n" //
-                + "out vec4 v_color;\n" //
-                + "out vec2 v_texCoords;\n" //
-                + "\n" //
-                + "void main()\n" //
-                + "{\n" //
-                + "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-                + "   v_color.a = v_color.a * (255.0/254.0);\n" //
-                + "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-                + "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-                + "}\n";
-        String fragmentShader = "#version 330 core\n"
-                + "#ifdef GL_ES\n" //
-                + "#define LOWP lowp\n" //
-                + "precision mediump float;\n" //
-                + "#else\n" //
-                + "#define LOWP \n" //
-                + "#endif\n" //
-                + "in LOWP vec4 v_color;\n" //
-                + "in vec2 v_texCoords;\n" //
-                + "out vec4 fragColor;\n" //
-                + "uniform sampler2D u_texture;\n" //
-                + "void main()\n"//
-                + "{\n" //
-                + "  fragColor = v_color * texture(u_texture, v_texCoords);\n" //
-                + "}";
+    private Body testBod;
 
-        ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
-        if (shader.isCompiled() == false) throw new IllegalArgumentException("Error compiling shader: " + shader.getLog());
-        return shader;
-    }
+    private Box2DDebugRenderer mDebugRenderer;
 
     @Override
     public void create() {
@@ -104,12 +77,38 @@ public class GDXTop extends ApplicationAdapter {
         this.mShapeRenderer = new ShapeRenderer();
 
         RenderSystem render = new RenderSystem();
-        render.setCamera( this.mCamera );
-        render.setSpriteBatch( this.mSpriteBatch );
-        render.setShapeRenderer( this.mShapeRenderer );
+        render.setRenderers( this.mSpriteBatch, this.mShapeRenderer );
         ObjectRegistry.renderSystem = render;
 
-        World world = new World( new Vector2( 0, 0 ), true );
+        World world = new World( new Vector2( 0, 0 ), false );
+        mDebugRenderer = new Box2DDebugRenderer();
+        world.setContactListener( new ContactListener() {
+
+            @Override
+            public void beginContact(Contact contact) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+                Gdx.app.log("beginContact", "between " + fixtureA.toString() + " and " + fixtureB.toString());
+            }
+
+            @Override
+            public void endContact(Contact contact) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+                Gdx.app.log("endContact", "between " + fixtureA.toString() + " and " + fixtureB.toString());
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {
+            }
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {
+            }
+
+        });
+
+        ObjectRegistry.box2Dworld = world;
         RayHandler rayHandler = new RayHandler( world );
         rayHandler.setCulling( true );
         rayHandler.setShadows( true );
@@ -121,28 +120,49 @@ public class GDXTop extends ApplicationAdapter {
         ObjectRegistry.rayHandler = rayHandler;
 
         // Box2d ~~~~~~~~~~~~~~~~~~~~~~
-// Create our body definition
+        // Create our body definition
         BodyDef groundBodyDef = new BodyDef();
-// Set its world position
-        groundBodyDef.position.set(new Vector2(150.0f, 150.0f));
+        groundBodyDef.type = BodyDef.BodyType.DynamicBody;
+        groundBodyDef.position.set( 400.0f, 400.0f );
 
-// Create a body from the defintion and add it to the world
-        Body groundBody = world.createBody(groundBodyDef);
-
-// Create a polygon shape
+        // Create a polygon shape
         PolygonShape groundBox = new PolygonShape();
-// Set the polygon shape as a box which is twice the size of our view port and 20 high
-// (setAsBox takes half-width and half-height as arguments)
         groundBox.setAsBox( 50.0f, 50.0f );
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = groundBox;
-        fixtureDef.filter.groupIndex = 0;
-// Create a fixture from our polygon shape and add it to our ground body
-        groundBody.createFixture( fixtureDef );
-// Clean up after ourselves
+        fixtureDef.friction = 1.0f;
+        fixtureDef.restitution = 0.6f;
+        fixtureDef.density = 1.0f;
+        fixtureDef.isSensor = true;
+
+        LightBodyComponent lightBody = new LightBodyComponent();
+        lightBody.createBody( groundBodyDef, fixtureDef );
+        lightBody.setOffset( 50.0f, 50.0f );
+
+        LightBodyComponent lightBody2 = new LightBodyComponent();
+        lightBody2.createBody( groundBodyDef, fixtureDef );
+        lightBody2.setOffset( 50.0f, 50.0f );
+
+        this.testBod = world.createBody( groundBodyDef );
+        this.testBod.createFixture( fixtureDef );
+
+        // Clean up after ourselves
         groundBox.dispose();
 
+        BodyDef circleBodyDef = new BodyDef();
+        circleBodyDef.type = BodyDef.BodyType.DynamicBody;
+
+        CircleShape circleShape = new CircleShape();
+        circleShape.setRadius( 75.0f );
+
+        FixtureDef fixtureDef2 = new FixtureDef();
+        fixtureDef2.shape = circleShape;
+        fixtureDef2.density = 1.0f;
+        fixtureDef2.isSensor = true;
+
+        LightBodyComponent lightBody3 = new LightBodyComponent();
+        lightBody3.createBody( circleBodyDef, fixtureDef2 );
 
         ////////////////////////////////////
 
@@ -212,9 +232,15 @@ public class GDXTop extends ApplicationAdapter {
         TestMovementComponent testComp = new TestMovementComponent();
         testComp.setMovementSpeed( 300.0f, 300.0f * 60.0f );
 
-        this.pt = new PointLight( rayHandler, 128, new Color( 0.0f, 0.0f, 0.0f, 1.0f ), 500.0f, 0.0f, 0.0f );
+        DumbMovementComponent dumbMove = new DumbMovementComponent();
+        dumbMove.setMovementSpeed( 100.0f, 100.0f * 60.0f );
+
+        DumbMovementComponent dumbMove2 = new DumbMovementComponent();
+        dumbMove2.setMovementSpeed( 100.0f, 100.0f * 60.0f );
+
+        this.pt = new PointLight( rayHandler, 512, new Color( 0.0f, 0.0f, 0.0f, 1.0f ), 500.0f, 0.0f, 0.0f );
         this.pt.setSoft( true );
-        this.pt.setSoftnessLength( 200.0f );
+        this.pt.setSoftnessLength( 100.0f );
         //this.pt = new ConeLight( rayHandler, 128, new Color( 0.0f, 0.0f, 0.0f, 1.0f ), 500.0f, 0.0f, 0.0f, 0.0f, 180.0f );
         //this.pt.setXray( true );
         this.mModifier = 1.0f;
@@ -303,15 +329,30 @@ public class GDXTop extends ApplicationAdapter {
 
         test2 = new GameObject();
         test2.add( renderCom );
+        test2.add( lightBody );
         test2.setPosition( test2.getPosition().add( 100.0f, 100.0f ) );
 
         test3 = new GameObject();
         test3.add( boxRenderer );
+        test3.add( lightBody2 );
         test3.setPosition( test3.getPosition().add( 150.0f, 150.0f ) );
 
         test4 = new GameObject();
         test4.add( circleRenderer );
+        test4.add( lightBody3 );
+        test4.add( movement );
+        test4.add( dumbMove );
         test4.setPosition( test4.getPosition().add( 100.0f, 100.0f ) );
+
+        Box2DUpdateObjectComponent boxUpdate = new Box2DUpdateObjectComponent();
+        Box2DMovementComponent boxMove = new Box2DMovementComponent();
+        boxMove.setBody( this.testBod );
+        boxUpdate.setBody( this.testBod );
+        GameObject test5 = new GameObject();
+        test5.add( dumbMove2 );
+        test5.add( boxMove );
+        test5.add( boxUpdate );
+
 
         manager = new ObjectManager( 64 );
         manager.add( background );
@@ -319,7 +360,7 @@ public class GDXTop extends ApplicationAdapter {
         manager.add( test2 );
         manager.add( test3 );
         manager.add( test4 );
-
+        manager.add( test5 );
     }
 
     @Override
@@ -333,6 +374,7 @@ public class GDXTop extends ApplicationAdapter {
         final InputSystem inputSystem = ObjectRegistry.inputSystem;
 
         manager.update( Gdx.graphics.getDeltaTime(), null );
+        ObjectRegistry.box2Dworld.step( 1.0f / 60.0f, 6, 2 );
 
         if( !this.mlastV && inputSystem.getV() ) {
             this.mModifier *= -1;
@@ -365,6 +407,8 @@ public class GDXTop extends ApplicationAdapter {
 
         renderSystem.swap( mRenderer, mCamera );
         mRenderer.render();
+        //Matrix4 camCopy = this.mCamera.combined.cpy();
+        this.mDebugRenderer.render( ObjectRegistry.box2Dworld, this.mCamera.combined );
         rayHandler.setCombinedMatrix( this.mCamera.combined );
         rayHandler.updateAndRender();
     }

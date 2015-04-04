@@ -21,6 +21,7 @@ public abstract class DrawableObject extends BaseObject {
     abstract public void draw( final float x, final float y );
 
     public DrawableObject() {
+        super();
         this.mType = DrawableType.NoType;
     }
 

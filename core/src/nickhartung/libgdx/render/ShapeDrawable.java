@@ -31,6 +31,7 @@ public abstract class ShapeDrawable extends DrawableObject {
     protected Color mColor;
 
     public ShapeDrawable() {
+        super();
         mData = new float[ DataItems.NumDataItems.getValue() ];
     }
 

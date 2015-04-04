@@ -19,7 +19,10 @@ public class Renderer {
     private ShapeRenderer mShapeRenderer;
 
     public void render() {
-        this.mSpriteBatch.setProjectionMatrix( this.mCamera.combined );
+        this.mSpriteBatch   = RenderSystem.getSpriteBatch();
+        this.mShapeRenderer = RenderSystem.getShapeRenderer();
+
+        this.mSpriteBatch.setProjectionMatrix(   this.mCamera.combined );
         this.mShapeRenderer.setProjectionMatrix( this.mCamera.combined );
 
         DrawableObject.DrawableType lastType = DrawableObject.DrawableType.NoType;
@@ -39,11 +42,9 @@ public class Renderer {
         this.endDrawing( lastType );
     }
 
-    public void setDrawQueue( final ObjectManager queue, final Camera pCamera, final SpriteBatch pBatch, final ShapeRenderer pShapeRenderer ) {
+    public void setDrawQueue( final ObjectManager queue, final Camera pCamera ) {
         this.mDrawQueue = queue;
         this.mCamera = pCamera;
-        this.mSpriteBatch = pBatch;
-        this.mShapeRenderer = pShapeRenderer;
     }
 
     private void beginDrawing( final DrawableObject.DrawableType pType ) {

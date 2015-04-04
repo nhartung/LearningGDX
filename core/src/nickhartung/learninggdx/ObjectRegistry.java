@@ -1,7 +1,8 @@
 package nickhartung.learninggdx;
 
+import com.badlogic.gdx.physics.box2d.World;
+
 import box2dLight.RayHandler;
-import nickhartung.learninggdx.InputSystem;
 import nickhartung.libgdx.render.RenderSystem;
 
 /**
@@ -10,6 +11,7 @@ import nickhartung.libgdx.render.RenderSystem;
 public class ObjectRegistry {
 
     public static RenderSystem renderSystem;
-    public static RayHandler rayHandler;
-    public static InputSystem inputSystem;
+    public static RayHandler   rayHandler;
+    public static InputSystem  inputSystem;
+    public static World        box2Dworld;
 }
