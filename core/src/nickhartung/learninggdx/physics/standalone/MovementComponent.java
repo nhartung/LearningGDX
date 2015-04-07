@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nickhartung.learninggdx;
+package nickhartung.learninggdx.physics.standalone;
 
+import nickhartung.learninggdx.GameComponent;
+import nickhartung.learninggdx.GameObject;
 import nickhartung.libgdx.utilities.BaseObject;
 import nickhartung.libgdx.utilities.Interpolator;
 
@@ -55,6 +57,10 @@ public class MovementComponent extends GameComponent {
         object.getPosition().set( newX, newY );
 
         object.getVelocity().set( newVelocityX, newVelocityY );
+
+        System.out.println( "Standalone: ---------------" );
+        System.out.println( "Velocity X: " + newVelocityX + " Velocity Y: " + newVelocityY );
+        System.out.println( "Position X: " + object.getPosition().x + " Position Y: " + object.getPosition().y );
     }
 
 }

@@ -27,6 +27,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import box2dLight.Light;
 import box2dLight.PointLight;
 import box2dLight.RayHandler;
+import nickhartung.learninggdx.physics.box2d.Box2DMovementComponent;
+import nickhartung.learninggdx.physics.box2d.Box2DWorldComponent;
+import nickhartung.learninggdx.physics.standalone.MovementComponent;
 import nickhartung.libgdx.render.BoxShapeDrawable;
 import nickhartung.libgdx.render.CircleShapeDrawable;
 import nickhartung.libgdx.render.RenderSystem;
@@ -113,7 +116,7 @@ public class GDXTop extends ApplicationAdapter {
         rayHandler.setCulling( true );
         rayHandler.setShadows( true );
         rayHandler.useDiffuseLight( true );
-        rayHandler.setAmbientLight( 0.0f, 0.0f, 0.0f, 1.0f );
+        rayHandler.setAmbientLight( 1.0f, 1.0f, 1.0f, 1.0f );
         rayHandler.setBlur( false );
         //rayHandler.setBlur( true );
         //rayHandler.setBlurNum( 50 );
@@ -182,6 +185,7 @@ public class GDXTop extends ApplicationAdapter {
 
         Sprite backgroundSprite = new Sprite( new Texture( "background.jpg" ) );
         backgroundSprite.setSize( 960.0f, 540.0f );
+        backgroundSprite.setColor( 0.0f, 0.0f, 1.0f, 1.0f );
         //backgroundSprite.setColor( 0.0f, 0.0f, 0.0f, 1.0f );
         RenderComponent renderBackground = new RenderComponent();
         SpriteDrawable backgroundDrawable = new SpriteDrawable();
@@ -236,7 +240,10 @@ public class GDXTop extends ApplicationAdapter {
         dumbMove.setMovementSpeed( 100.0f, 100.0f * 60.0f );
 
         DumbMovementComponent dumbMove2 = new DumbMovementComponent();
-        dumbMove2.setMovementSpeed( 100.0f, 100.0f * 60.0f );
+        dumbMove2.setMovementSpeed( 100.0f, 100.0f );
+
+        DumbMovementComponent dumbMove3 = new DumbMovementComponent();
+        dumbMove3.setMovementSpeed( 100.0f, 100.0f );
 
         this.pt = new PointLight( rayHandler, 512, new Color( 0.0f, 0.0f, 0.0f, 1.0f ), 500.0f, 0.0f, 0.0f );
         this.pt.setSoft( true );
@@ -344,23 +351,33 @@ public class GDXTop extends ApplicationAdapter {
         test4.add( dumbMove );
         test4.setPosition( test4.getPosition().add( 100.0f, 100.0f ) );
 
-        Box2DUpdateObjectComponent boxUpdate = new Box2DUpdateObjectComponent();
         Box2DMovementComponent boxMove = new Box2DMovementComponent();
         boxMove.setBody( this.testBod );
-        boxUpdate.setBody( this.testBod );
         GameObject test5 = new GameObject();
         test5.add( dumbMove2 );
         test5.add( boxMove );
-        test5.add( boxUpdate );
+        test5.add( boxRenderer );
 
+        MovementComponent movementComponent = new MovementComponent();
+        GameObject test6 = new GameObject();
+        test6.add( dumbMove3 );
+        test6.add( movementComponent );
+        test6.add( boxRenderer );
+        test6.setPosition( test6.getPosition().add( 400.0f, 300.0f ) );
+
+        GameObject box2DObject = new GameObject();
+        Box2DWorldComponent worldCom = new Box2DWorldComponent();
+        worldCom.setWorld( world );
 
         manager = new ObjectManager( 64 );
         manager.add( background );
-        manager.add( test );
-        manager.add( test2 );
-        manager.add( test3 );
-        manager.add( test4 );
+        //manager.add( test );
+        //manager.add( test2 );
+        //manager.add( test3 );
+        //manager.add( test4 );
+        manager.add( worldCom );
         manager.add( test5 );
+        manager.add( test6 );
     }
 
     @Override
@@ -373,8 +390,11 @@ public class GDXTop extends ApplicationAdapter {
         final RayHandler rayHandler = ObjectRegistry.rayHandler;
         final InputSystem inputSystem = ObjectRegistry.inputSystem;
 
-        manager.update( Gdx.graphics.getDeltaTime(), null );
-        ObjectRegistry.box2Dworld.step( 1.0f / 60.0f, 6, 2 );
+        final float delta = Gdx.graphics.getDeltaTime();
+        //manager.update( delta, null );
+        //ObjectRegistry.box2Dworld.step( delta, 6, 2 );
+        manager.update( 60.0f / 60.0f, null );
+        //ObjectRegistry.box2Dworld.step( 60.0f / 60.0f, 6, 2 );
 
         if( !this.mlastV && inputSystem.getV() ) {
             this.mModifier *= -1;
