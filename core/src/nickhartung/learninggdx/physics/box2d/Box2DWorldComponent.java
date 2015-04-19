@@ -26,6 +26,7 @@ public class Box2DWorldComponent extends GameComponent {
     @Override
     public void update( final float pTimeDelta, final BaseObject pParent ) {
         assert( this.mWorld != null );
+        //this.mWorld.step( pTimeDelta, 6, 2 );
         this.mWorld.step( pTimeDelta, 6, 2 );
     }
 
