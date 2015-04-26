@@ -1,9 +1,7 @@
 package nickhartung.learninggdx.physics.box2d;
 
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 
-import nickhartung.learninggdx.GDXTop;
 import nickhartung.learninggdx.GameComponent;
 import nickhartung.learninggdx.GameObject;
 import nickhartung.learninggdx.ObjectRegistry;
@@ -35,8 +33,8 @@ public class Box2DMovementComponent extends GameComponent {
     @Override
     public void update( final float pTimeDelta, final BaseObject pParent ) {
 
+        Box2DSystem box2DSystem = ObjectRegistry.box2DSystem;
         final GameObject object = (GameObject)pParent;
-        object.setPosition( this.mBody.getPosition().scl( GDXTop.PIXELS_PER_METER ) );
 
         sInterpolator.set( object.getVelocity().x, object.getTargetVelocity().x,
                            object.getAcceleration().x );
@@ -48,21 +46,17 @@ public class Box2DMovementComponent extends GameComponent {
         sInterpolator.interpolate( pTimeDelta );
         float newVelocityY = sInterpolator.getCurrent();
 
-        System.out.println( this.mBody.getMass() );
         final float dx = newVelocityX - object.getVelocity().x;
         final float dy = newVelocityY - object.getVelocity().y;
         final float mass = this.mBody.getMass();
         this.mBody.applyForce( mass * ( dx / pTimeDelta ),
-                                       mass * ( dy / pTimeDelta ),
-                                       this.mBody.getWorldCenter().x, this.mBody.getWorldCenter().y, true );
+                               mass * ( dy / pTimeDelta ),
+                               this.mBody.getWorldCenter().x, this.mBody.getWorldCenter().y, true );
         //this.mBody.setLinearVelocity( newVelocityX, newVelocityY );
 
         object.getVelocity().set( newVelocityX, newVelocityY );
 
-
-        //System.out.println( "Box2D: ---------------" );
-        //System.out.println( "Velocity X: " + this.mBody.getLinearVelocity().x + " Velocity Y: " + this.mBody.getLinearVelocity().y );
-        //System.out.println( "Position X: " + object.getPosition().x + " Position Y: " + object.getPosition().y );
+        box2DSystem.scheduleForUpdate( this.mBody );
     }
 
     public void setBody( final Body pBody ) {
@@ -70,8 +64,8 @@ public class Box2DMovementComponent extends GameComponent {
     }
 
     private void returnBody() {
-        final World world = ObjectRegistry.box2Dworld;
-        world.destroyBody( this.mBody );
+        //final World world = ObjectRegistry.box2Dworld;
+        //world.destroyBody( this.mBody );
         this.mBody = null;
     }
 }

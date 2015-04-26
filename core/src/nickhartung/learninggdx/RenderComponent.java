@@ -11,10 +11,13 @@ public class RenderComponent extends GameComponent {
 
     protected int mPriority;
     protected DrawableObject mDrawable;
+    protected boolean mDeferred;
 
     public RenderComponent() {
         super();
         this.mDrawable = null;
+        this.mDeferred = false;
+        this.mPriority = 0;
         this.setPhase( ComponentPhases.DRAW.ordinal() );
     }
 
@@ -24,7 +27,7 @@ public class RenderComponent extends GameComponent {
             RenderSystem renderSystem = ObjectRegistry.renderSystem;
             if( renderSystem != null ) {
                 final GameObject gameObject = (GameObject)parent;
-                renderSystem.scheduleForDraw( this.mDrawable, gameObject.getPosition(), this.mPriority );
+                renderSystem.scheduleForDraw( this.mDrawable, gameObject.getPosition(), this.mPriority, this.mDeferred );
             }
         }
     }
@@ -37,10 +40,15 @@ public class RenderComponent extends GameComponent {
     public void reset() {
         super.reset();
         this.mPriority = 0;
+        this.mDeferred = false;
         this.mDrawable = null;
     }
 
     public void setPriority( final int pPriority ) {
         this.mPriority = pPriority;
+    }
+
+    public void setDeferred( final boolean pDeferred ) {
+        this.mDeferred = pDeferred;
     }
 }

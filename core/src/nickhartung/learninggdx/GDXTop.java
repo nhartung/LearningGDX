@@ -15,14 +15,12 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import box2dLight.Light;
 import box2dLight.RayHandler;
 import nickhartung.learninggdx.physics.box2d.Box2DMovementComponent;
 import nickhartung.learninggdx.physics.box2d.Box2DSystem;
-import nickhartung.learninggdx.physics.box2d.Box2DWorldComponent;
 import nickhartung.learninggdx.physics.standalone.MovementComponent;
 import nickhartung.libgdx.render.BoxShapeDrawable;
 import nickhartung.libgdx.render.RenderSystem;
@@ -70,7 +68,7 @@ public class GDXTop extends ApplicationAdapter {
         render.setRenderers( this.mSpriteBatch, this.mShapeRenderer );
         ObjectRegistry.renderSystem = render;
 
-        Box2DSystem box2DSystem = new Box2DSystem( new Vector2( 0, 0 ), false, 6, 2 );
+        Box2DSystem box2DSystem = new Box2DSystem( new Vector2( 0, 0 ), false, 6, 2, 100 );
         ObjectRegistry.box2DSystem = box2DSystem;
         mDebugRenderer = new Box2DDebugRenderer();
 
@@ -104,7 +102,8 @@ public class GDXTop extends ApplicationAdapter {
         fixtureDef.density = 0.0f;
         fixtureDef.isSensor = true;
 
-        this.mBody = box2DSystem.createBody( groundBodyDef, fixtureDef );
+        GameObject box2DObject = new GameObject();
+        this.mBody = box2DSystem.createBody( groundBodyDef, fixtureDef, box2DObject );
 
         GameObject backgroundObject = new GameObject();
         Sprite backgroundSprite = new Sprite( new Texture( "background.jpg" ) );
@@ -127,8 +126,8 @@ public class GDXTop extends ApplicationAdapter {
         standaloneObject.add( movementStandalone );
         standaloneObject.add( standaloneRenderComponent );
 
-        GameObject box2DObject = new GameObject();
         RenderComponent box2DRenderComponent = new RenderComponent();
+        box2DRenderComponent.setDeferred( true );
         box2DRenderComponent.setDrawable( boxDrawable );
         DumbMovementComponent dumbMoverBox2D = new DumbMovementComponent();
         dumbMoverBox2D.setMovementSpeed( 100.0f / PIXELS_PER_METER, 100.0f / PIXELS_PER_METER );
@@ -140,16 +139,10 @@ public class GDXTop extends ApplicationAdapter {
         box2DObject.add( box2DMover );
         box2DObject.getPosition().set( 0.0f, 100.0f );
 
-        GameObject worldObject = new GameObject();
-        Box2DWorldComponent worldCom = new Box2DWorldComponent();
-        worldCom.setWorld( world );
-        worldObject.add( worldCom );
-
         this.mManager = new ObjectManager( 64 );
         this.mManager.add( backgroundObject );
         this.mManager.add( standaloneObject );
         this.mManager.add( box2DObject );
-        this.mManager.add( worldObject );
     }
 
     @Override
@@ -159,16 +152,13 @@ public class GDXTop extends ApplicationAdapter {
         Gdx.gl.glClearColor( 0, 0, 0, 1 );
         Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
         final RenderSystem renderSystem = ObjectRegistry.renderSystem;
-        final RayHandler rayHandler = ObjectRegistry.rayHandler;
+        //final RayHandler rayHandler = ObjectRegistry.rayHandler;
         final InputSystem inputSystem = ObjectRegistry.inputSystem;
 
         final float delta = Gdx.graphics.getDeltaTime();
 
-        this.mManager.update( 1.0f / 60.0f, null );
-
-        System.out.println( "Box2D: ---------------" );
-        System.out.println( "Velocity X: " + this.mBody.getLinearVelocity().x + " Velocity Y: " + this.mBody.getLinearVelocity().y );
-        System.out.println( "Position X: " + this.mBody.getPosition().x + " Position Y: " + this.mBody.getPosition().y );
+        this.mManager.update( delta, null );
+        ObjectRegistry.box2DSystem.update( delta, null );
 
         if( !this.mlastV && inputSystem.getV() ) {
             this.mModifier *= -1;
@@ -203,8 +193,8 @@ public class GDXTop extends ApplicationAdapter {
         mRenderer.render();
         //Matrix4 camCopy = this.mCamera.combined.cpy();
         this.mDebugRenderer.render( ObjectRegistry.box2DSystem.getWorld(), this.mCamera.combined );
-        rayHandler.setCombinedMatrix( this.mCamera.combined );
-        rayHandler.updateAndRender();
+        //rayHandler.setCombinedMatrix( this.mCamera.combined );
+        //rayHandler.updateAndRender();
     }
 
     @Override

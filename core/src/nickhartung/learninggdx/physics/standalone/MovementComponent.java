@@ -57,10 +57,6 @@ public class MovementComponent extends GameComponent {
         object.getPosition().set( newX, newY );
 
         object.getVelocity().set( newVelocityX, newVelocityY );
-
-        System.out.println( "Standalone: ---------------" );
-        System.out.println( "Velocity X: " + newVelocityX + " Velocity Y: " + newVelocityY );
-        System.out.println( "Position X: " + object.getPosition().x + " Position Y: " + object.getPosition().y );
     }
 
 }

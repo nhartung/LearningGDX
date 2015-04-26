@@ -40,7 +40,7 @@ public class LightBodyComponent extends GameComponent {
     }
 
     public void createBody( final BodyDef pBodyDef, final FixtureDef pFixtureDef ) {
-        final World world = ObjectRegistry.box2Dworld;
+        final World world = ObjectRegistry.box2DSystem.getWorld();
         if( this.mBody != null ) {
             returnBody();
         }
@@ -53,7 +53,7 @@ public class LightBodyComponent extends GameComponent {
     }
 
     private void returnBody() {
-        final World world = ObjectRegistry.box2Dworld;
+        final World world = ObjectRegistry.box2DSystem.getWorld();
         world.destroyBody( this.mBody );
         this.mBody = null;
     }
