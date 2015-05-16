@@ -13,10 +13,10 @@ import nickhartung.libgdx.utilities.Interpolator;
  */
 public class Box2DMovementComponent extends GameComponent {
 
-    private Body mBody;
     // If multiple game components were ever running in different threads, this would need
     // to be non-static.
     private static Interpolator sInterpolator = new Interpolator();
+    private Body mBody;
 
     public Box2DMovementComponent() {
         super();
@@ -25,9 +25,7 @@ public class Box2DMovementComponent extends GameComponent {
 
     @Override
     public void reset() {
-        if( this.mBody != null ) {
-            returnBody();
-        }
+        this.mBody = null;
     }
 
     @Override
@@ -55,17 +53,9 @@ public class Box2DMovementComponent extends GameComponent {
         //this.mBody.setLinearVelocity( newVelocityX, newVelocityY );
 
         object.getVelocity().set( newVelocityX, newVelocityY );
-
-        box2DSystem.scheduleForUpdate( this.mBody );
     }
 
     public void setBody( final Body pBody ) {
         this.mBody = pBody;
-    }
-
-    private void returnBody() {
-        //final World world = ObjectRegistry.box2Dworld;
-        //world.destroyBody( this.mBody );
-        this.mBody = null;
     }
 }

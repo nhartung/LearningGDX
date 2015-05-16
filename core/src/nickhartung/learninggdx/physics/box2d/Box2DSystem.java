@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 
-import nickhartung.learninggdx.GDXTop;
 import nickhartung.learninggdx.GameObject;
 import nickhartung.libgdx.utilities.BaseObject;
 import nickhartung.utilities.FixedSizeArray;
@@ -21,40 +20,38 @@ public class Box2DSystem extends BaseObject {
     private int mPositionIterations;
     private World mWorld;
 
-    private int mBodyCount;
-    private int mMaxBodies;
-    private FixedSizeArray<Body> mUpdateQueue;
+    private int mObjectCount;
+    private int mMaxObjects;
+    private FixedSizeArray<GameObject> mUpdateQueue;
     private int mNumQueuedObjects;
     private HashElement[] mObjectHash;
-    private Body mNullBody;
-    private Body mTombstoneBody;
+    private GameObject mNullObject;
+    private GameObject mTombstoneObject;
     // This would need to be made non-static if we were to ever have multiple Box2DSystems in separate threads.
     private static FixedSizeArray<FixtureDef> sFixtureWorker = new FixedSizeArray<FixtureDef>( 1 );
 
-    public Box2DSystem( final Vector2 pGravity, final boolean pSleep, final int pVelocityIterations, final int pPositionIterations, final int pNumBodies ) {
+    public Box2DSystem( final Vector2 pGravity, final boolean pSleep, final int pVelocityIterations, final int pPositionIterations, final int pNumObjects ) {
         this.mWorld = new World( pGravity, pSleep );
         this.mVelocityIterations = pVelocityIterations;
         this.mPositionIterations = pPositionIterations;
-        this.mMaxBodies = pNumBodies;
-        this.mUpdateQueue = new FixedSizeArray<Body>( pNumBodies );
+        this.mMaxObjects = pNumObjects;
+        this.mUpdateQueue = new FixedSizeArray<GameObject>( pNumObjects );
 
         // Make the hash twice the size needed to avoid many collisions
-        final int hashSize = this.mMaxBodies * 2;
+        final int hashSize = this.mMaxObjects * 2;
         this.mObjectHash = new HashElement[ hashSize ];
-        // Create our null and tombstone bodies. This is necessary because we cannot construct bodies without calling
-        // "createBody" on our Box2D World.
-        BodyDef def         = new BodyDef();
-        this.mNullBody      = this.mWorld.createBody( def );
-        this.mTombstoneBody = this.mWorld.createBody( def );
+        // Create our null and tombstone objects.
+        this.mNullObject      = new GameObject();
+        this.mTombstoneObject = new GameObject();
         for( int i = 0; i < hashSize; i++ ) {
-            this.mObjectHash[ i ] = new HashElement();
-            this.mObjectHash[ i ].key = this.mNullBody;
+            this.mObjectHash[ i ]     = new HashElement();
+            this.mObjectHash[ i ].key = this.mNullObject;
         }
     }
 
     public Body createBody( final BodyDef pBodyDef, final FixedSizeArray<FixtureDef> pFixtureDefs, final GameObject pHostObject ) {
         Body retBody = null;
-        if( this.mBodyCount < this.mMaxBodies ) {
+        if( this.mObjectCount < this.mMaxObjects ) {
             retBody = this.mWorld.createBody( pBodyDef );
             final int count = pFixtureDefs.getCount();
             Object[] fixtures = pFixtureDefs.getArray();
@@ -62,7 +59,8 @@ public class Box2DSystem extends BaseObject {
                 final FixtureDef fixture = (FixtureDef)fixtures[ i ];
                 retBody.createFixture( fixture );
             }
-            this.addToHash( retBody, pHostObject );
+            this.addToHash( pHostObject, retBody );
+            this.mObjectCount++;
         } else {
             Gdx.app.error( "Box2DSystem", "Box2d Bodies have been exhausted!" );
         }
@@ -75,41 +73,21 @@ public class Box2DSystem extends BaseObject {
         return this.createBody( pBodyDef, sFixtureWorker, pHostObject );
     }
 
-    public void destroyBody( final Body pBody ) {
-        this.removeFromHash( pBody );
-        this.mWorld.destroyBody( pBody );
+    public void destroyBody( final GameObject pObject ) {
+        final Body body = this.removeFromHash( pObject );
+        if( body != null ) {
+            this.mObjectCount--;
+            this.mWorld.destroyBody( body );
+        }
     }
 
     public World getWorld() {
         return this.mWorld;
     }
 
-    public void updateObjectPosition( final Body pBody ) {
-        GameObject object = this.getObjectFromHash( pBody );
-        Vector2 bodyPosition = pBody.getPosition();
-        object.getPosition().set( bodyPosition.x * GDXTop.PIXELS_PER_METER, bodyPosition.y * GDXTop.PIXELS_PER_METER );
-    }
-
-    /**
-     *  Schedules a body (used as a key into the Hash) whose linked GameObject should be updated to the position of
-     *  this body.
-     *
-     * @param pBody The body to use as the key in the Hash
-     */
-    public void scheduleForUpdate( final Body pBody ) {
-        this.mUpdateQueue.add( pBody );
-    }
-
     @Override
     public void update( final float pTimeDelta, final BaseObject pParent ) {
         this.mWorld.step( pTimeDelta, this.mVelocityIterations, this.mPositionIterations );
-        final int numBodies = this.mUpdateQueue.getCount();
-        final Object[] objects = this.mUpdateQueue.getArray();
-        for( int i = 0; i < numBodies; i++ ) {
-            final Body body = (Body)objects[ i ];
-            this.updateObjectPosition( body );
-        }
-        this.mUpdateQueue.clear();
     }
 
     @Override
@@ -117,46 +95,60 @@ public class Box2DSystem extends BaseObject {
         this.mWorld.dispose();
     }
 
-    private GameObject getObjectFromHash( final Body pKey ) {
-        GameObject retObject = null;
+    private Body getBodyFromHash( final GameObject pKey ) {
+        Body retBody = null;
         final int index = this.getHashIndex( pKey );
         final int realIndex = this.findFirstKey( index, pKey );
         if( realIndex != -1 ) {
-            retObject = this.mObjectHash[ realIndex ].value;
+            retBody = this.mObjectHash[ realIndex ].value;
         }
-        return retObject;
+        return retBody;
     }
 
-    private void addToHash( final Body pKey, final GameObject pValue ) {
+    private void addToHash( final GameObject pKey, final Body pValue ) {
         final int index = this.getHashIndex( pKey );
-        final int realIndex = this.findFirstKey( index, this.mNullBody );
+        final int realIndex = this.findFirstKey( index, this.mNullObject );
         if( realIndex != -1 ) {
             this.mObjectHash[ realIndex ].key   = pKey;
             this.mObjectHash[ realIndex ].value = pValue;
         }
     }
 
-    private void removeFromHash( final Body pKey ) {
-        final int index = this.getHashIndex( pKey );
+    /**
+     *
+     * @param pKey The GameObject to use as the key for the Hash
+     * @return The body removed from the Hash, if found, null otherwise.
+     */
+    private Body removeFromHash( final GameObject pKey ) {
+        Body retBody = null;
+        final int index     = this.getHashIndex( pKey );
         final int realIndex = this.findFirstKey( index, pKey );
         if( realIndex != -1 ) {
-            this.mObjectHash[ realIndex ].key   = this.mTombstoneBody;
+            retBody = this.mObjectHash[ realIndex ].value;
+            this.mObjectHash[ realIndex ].key   = this.mTombstoneObject;
             this.mObjectHash[ realIndex ].value = null;
         }
+        return retBody;
     }
 
-    private int getHashIndex( final Body pKey ) {
+    private int getHashIndex( final GameObject pKey ) {
         return pKey.hashCode() % this.mObjectHash.length;
     }
 
-    private int findFirstKey( final int pIndex, final Body pKey ) {
+    private int findFirstKey( final int pIndex, final GameObject pKey ) {
         int index = -1;
         for (int i = 0; i < this.mObjectHash.length; i++) {
             final int actualIndex = ( pIndex + i ) % this.mObjectHash.length;
-            if( this.mObjectHash[ actualIndex ].key.equals( pKey ) ) {
+            final GameObject object = this.mObjectHash[ actualIndex ].key;
+            final boolean isNull = object.equals( this.mNullObject );
+            if( object.equals( pKey ) ) {
                 index = actualIndex;
                 break;
-            } else if( this.mObjectHash[ actualIndex ].key.equals( this.mNullBody ) ) {
+            } else if( object.equals( this.mTombstoneObject ) && isNull ) {
+                // Accounting for the case when we are searching for an open spot in the hash, and the open spot
+                // is a tombstone object.
+                index = actualIndex;
+            } else if( isNull ) {
                 Gdx.app.error( "Box2DSystem", "Object does not exist in Hash!" );
                 break;
             }
@@ -165,15 +157,15 @@ public class Box2DSystem extends BaseObject {
     }
 
     private class HashElement {
-        public Body       key;
-        public GameObject value;
+        public GameObject     key;
+        public Body           value;
 
         public HashElement() {
             this.key   = null;
             this.value = null;
         }
 
-        public HashElement( final Body pKey, final GameObject pValue ) {
+        public HashElement( final GameObject pKey, final Body pValue ) {
             this.key   = pKey;
             this.value = pValue;
         }

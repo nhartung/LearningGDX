@@ -20,13 +20,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import box2dLight.Light;
 import box2dLight.RayHandler;
 import nickhartung.learninggdx.physics.box2d.Box2DMovementComponent;
+import nickhartung.learninggdx.physics.box2d.Box2DPositionUpdateComponent;
 import nickhartung.learninggdx.physics.box2d.Box2DSystem;
 import nickhartung.learninggdx.physics.standalone.MovementComponent;
 import nickhartung.libgdx.render.BoxShapeDrawable;
 import nickhartung.libgdx.render.RenderSystem;
 import nickhartung.libgdx.render.Renderer;
 import nickhartung.libgdx.render.SpriteDrawable;
-import nickhartung.libgdx.utilities.ObjectManager;
 
 public class GDXTop extends ApplicationAdapter {
     SpriteBatch batch;
@@ -39,11 +39,12 @@ public class GDXTop extends ApplicationAdapter {
     private SpriteBatch mSpriteBatch;
     private ShapeRenderer mShapeRenderer;
 
-    private ObjectManager mManager;
+    private GameObjectManager mManager;
 
     private float      mModifier;
     private boolean    mlastV;
     private Body       mBody;
+    private GameObject test;
     private Light pt;
 
     private Body testBod;
@@ -51,6 +52,10 @@ public class GDXTop extends ApplicationAdapter {
     private Box2DDebugRenderer mDebugRenderer;
 
     public static float PIXELS_PER_METER = 100.0f;
+
+    private float       mAccumulator;
+    private boolean     mRenderReady;
+    public static float UPDATE_RATE = 1.0f / 60.0f;
 
     @Override
     public void create() {
@@ -83,6 +88,8 @@ public class GDXTop extends ApplicationAdapter {
         InputSystem inputSystem = new InputSystem();
         ObjectRegistry.inputSystem = inputSystem;
 
+        this.mAccumulator = 0.0f;
+        this.mRenderReady = false;
         // Box2d ~~~~~~~~~~~~~~~~~~~~~~
         // Create our body definition
         BodyDef groundBodyDef = new BodyDef();
@@ -127,19 +134,23 @@ public class GDXTop extends ApplicationAdapter {
         standaloneObject.add( standaloneRenderComponent );
 
         RenderComponent box2DRenderComponent = new RenderComponent();
-        box2DRenderComponent.setDeferred( true );
         box2DRenderComponent.setDrawable( boxDrawable );
         DumbMovementComponent dumbMoverBox2D = new DumbMovementComponent();
         dumbMoverBox2D.setMovementSpeed( 100.0f / PIXELS_PER_METER, 100.0f / PIXELS_PER_METER );
         Box2DMovementComponent box2DMover = new Box2DMovementComponent();
         box2DMover.setBody( this.mBody );
 
+        Box2DPositionUpdateComponent box2DPosUpdater = new Box2DPositionUpdateComponent();
+        box2DPosUpdater.setBody( this.mBody );
+
         box2DObject.add( box2DRenderComponent );
         box2DObject.add( dumbMoverBox2D );
         box2DObject.add( box2DMover );
+        box2DObject.add( box2DPosUpdater );
         box2DObject.getPosition().set( 0.0f, 100.0f );
 
-        this.mManager = new ObjectManager( 64 );
+        this.test = box2DObject;
+        this.mManager = new GameObjectManager( 64 );
         this.mManager.add( backgroundObject );
         this.mManager.add( standaloneObject );
         this.mManager.add( box2DObject );
@@ -147,6 +158,7 @@ public class GDXTop extends ApplicationAdapter {
 
     @Override
     public void render() {
+
         this.mCamera.update();
 
         Gdx.gl.glClearColor( 0, 0, 0, 1 );
@@ -156,9 +168,19 @@ public class GDXTop extends ApplicationAdapter {
         final InputSystem inputSystem = ObjectRegistry.inputSystem;
 
         final float delta = Gdx.graphics.getDeltaTime();
+        this.mAccumulator += delta;
+        boolean updated = false;
+        while( this.mAccumulator >= UPDATE_RATE ) {
+            this.mManager.setUpdatePhases( GameComponent.ComponentPhases.THINK.ordinal(), GameComponent.ComponentPhases.POST_PHYSICS.ordinal() );
+            this.mManager.update( UPDATE_RATE, null );
+            ObjectRegistry.box2DSystem.update( UPDATE_RATE, null );
+            this.mManager.setUpdatePhases( GameComponent.ComponentPhases.MOVEMENT.ordinal(), GameComponent.ComponentPhases.FRAME_END.ordinal() );
+            this.mManager.update( UPDATE_RATE, null );
+            this.mAccumulator -= UPDATE_RATE;
+            updated = true;
+        }
 
-        this.mManager.update( delta, null );
-        ObjectRegistry.box2DSystem.update( delta, null );
+        // TODO: We need to do something with the leftover time in the accumulator here...
 
         if( !this.mlastV && inputSystem.getV() ) {
             this.mModifier *= -1;
@@ -189,12 +211,22 @@ public class GDXTop extends ApplicationAdapter {
                               1.0f );
         }
 
-        renderSystem.swap( mRenderer, mCamera );
-        mRenderer.render();
+        if( updated ) {
+            renderSystem.swap( mRenderer, mCamera );
+            this.mRenderReady = true;
+        }
+        if( this.mRenderReady ) {
+            mRenderer.render();
+        }
         //Matrix4 camCopy = this.mCamera.combined.cpy();
         this.mDebugRenderer.render( ObjectRegistry.box2DSystem.getWorld(), this.mCamera.combined );
         //rayHandler.setCombinedMatrix( this.mCamera.combined );
         //rayHandler.updateAndRender();
+    }
+
+    @Override
+    public void dispose() {
+        ObjectRegistry.box2DSystem.destroyBody( this.test );
     }
 
     @Override

@@ -17,6 +17,8 @@ package nickhartung.learninggdx;
 
 import com.badlogic.gdx.math.Vector2;
 
+import nickhartung.libgdx.utilities.BaseObject;
+import nickhartung.libgdx.utilities.PhasedObject;
 import nickhartung.libgdx.utilities.PhasedObjectManager;
 
 /**
@@ -26,6 +28,8 @@ import nickhartung.libgdx.utilities.PhasedObjectManager;
  * components can use to share state (direct component-to-component communication is discouraged).
  */
 public class GameObject extends PhasedObjectManager {
+    public static final int ALL_PHASES = -1;
+
     // These fields are managed by components.
     private Vector2 mPosition;
     private Vector2 mVelocity;
@@ -33,6 +37,9 @@ public class GameObject extends PhasedObjectManager {
     private Vector2 mAcceleration;
     private Vector2 mImpulse;
     private Vector2 mFacingDirection;
+
+    private int mStartPhase;
+    private int mEndPhase;
 
     public float width;
     public float height;
@@ -62,6 +69,22 @@ public class GameObject extends PhasedObjectManager {
     }
 
     @Override
+    public void update( final float timeDelta, final BaseObject parent ) {
+        commitUpdates();
+        final int count = this.getObjects().getCount();
+        if( count > 0 ) {
+            final Object[] objectArray = this.getObjects().getArray();
+            for( int i = 0; i < count; i++ ) {
+                PhasedObject object = (PhasedObject)objectArray[ i ];
+                final int phase = object.phase;
+                if( phase >= this.mStartPhase && phase <= this.mEndPhase ) {
+                    object.update( timeDelta, this );
+                }
+            }
+        }
+    }
+
+    @Override
     public void reset() {
         removeAll();
         commitUpdates();
@@ -76,6 +99,7 @@ public class GameObject extends PhasedObjectManager {
         this.mCurrentAction = ActionType.INVALID;
         this.width = 0.0f;
         this.height = 0.0f;
+        this.setUpdatePhases( ALL_PHASES, ALL_PHASES );
     }
 
     public final Vector2 getPosition() {
@@ -140,5 +164,18 @@ public class GameObject extends PhasedObjectManager {
 
     public final void setFacingDirection( final Vector2 pFacingDirection ) {
         this.mFacingDirection = pFacingDirection;
+    }
+
+    public void setUpdatePhases( final int pStartPhase, final int pEndPhase ) {
+        if( pStartPhase == ALL_PHASES ) {
+            this.mStartPhase = 0;
+        } else {
+            this.mStartPhase = pStartPhase;
+        }
+        if( pEndPhase == ALL_PHASES ) {
+            this.mEndPhase = Integer.MAX_VALUE;
+        } else {
+            this.mEndPhase   = pEndPhase;
+        }
     }
 }
