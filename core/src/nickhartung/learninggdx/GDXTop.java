@@ -1,5 +1,6 @@
 package nickhartung.learninggdx;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -13,12 +14,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import box2dLight.Light;
 import box2dLight.RayHandler;
+import nickhartung.learninggdx.physics.CollisionComponent;
+import nickhartung.learninggdx.physics.TestCollisionComponent;
 import nickhartung.learninggdx.physics.box2d.Box2DMovementComponent;
 import nickhartung.learninggdx.physics.box2d.Box2DPositionUpdateComponent;
 import nickhartung.learninggdx.physics.box2d.Box2DSystem;
@@ -59,6 +67,7 @@ public class GDXTop extends ApplicationAdapter {
 
     @Override
     public void create() {
+        Gdx.app.setLogLevel( Application.LOG_DEBUG );
         this.mCamera = new OrthographicCamera();
         this.mViewport = new FitViewport( 960.0f, 540.0f, this.mCamera );
         this.mViewport.apply();
@@ -73,7 +82,46 @@ public class GDXTop extends ApplicationAdapter {
         render.setRenderers( this.mSpriteBatch, this.mShapeRenderer );
         ObjectRegistry.renderSystem = render;
 
-        Box2DSystem box2DSystem = new Box2DSystem( new Vector2( 0, 0 ), false, 6, 2, 100 );
+        ContactListener contactListener = new ContactListener() {
+            @Override
+            public void beginContact(Contact contact) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+                final GameObject objectA  = (GameObject)fixtureA.getBody().getUserData();
+                final GameObject objectB  = (GameObject)fixtureB.getBody().getUserData();
+                final CollisionComponent collisionA = (CollisionComponent)fixtureA.getUserData();
+                final CollisionComponent collisionB = (CollisionComponent)fixtureB.getUserData();
+                if( collisionA != null && collisionB != null ) {
+                    if( collisionA.isAttackObject() && collisionB.isVulnerableObject() ) {
+                        final boolean hitAccepted = collisionB.receivedHit( objectB, objectA, collisionA.getHitType() );
+                        if( hitAccepted ) {
+                            collisionA.hitVictim( objectA, objectB, collisionA.getHitType(), hitAccepted );
+                        }
+                    }
+                    if( collisionB.isAttackObject() && collisionA.isVulnerableObject() ) {
+                        final boolean hitAccepted = collisionA.receivedHit( objectA, objectB, collisionB.getHitType() );
+                        if( hitAccepted ) {
+                            collisionB.hitVictim( objectB, objectA, collisionB.getHitType(), hitAccepted );
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void endContact(Contact contact) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {
+            }
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {
+            }
+        };
+        Box2DSystem box2DSystem = new Box2DSystem( new Vector2( 0, 0 ), false, 6, 2, 100, contactListener );
         ObjectRegistry.box2DSystem = box2DSystem;
         mDebugRenderer = new Box2DDebugRenderer();
 
@@ -110,7 +158,19 @@ public class GDXTop extends ApplicationAdapter {
         fixtureDef.isSensor = true;
 
         GameObject box2DObject = new GameObject();
-        this.mBody = box2DSystem.createBody( groundBodyDef, fixtureDef, box2DObject );
+        TestCollisionComponent collisionComponent1 = new TestCollisionComponent();
+        collisionComponent1.setAttackObject( true );
+        collisionComponent1.setVulnerableObject( false );
+        collisionComponent1.setHitType( CollisionComponent.HitType.DAMAGE );
+        this.mBody = box2DSystem.createBody( groundBodyDef, fixtureDef, collisionComponent1, box2DObject );
+
+        groundBodyDef.position.set( 300.0f / PIXELS_PER_METER, 100.0f / PIXELS_PER_METER );
+        GameObject otherBox2DObject = new GameObject();
+        TestCollisionComponent collisionComponent2 = new TestCollisionComponent();
+        collisionComponent2.setAttackObject( false );
+        collisionComponent2.setVulnerableObject( true );
+        collisionComponent2.setHitType( CollisionComponent.HitType.DAMAGE );
+        final Body otherBody = box2DSystem.createBody( groundBodyDef, fixtureDef, collisionComponent2, otherBox2DObject );
 
         GameObject backgroundObject = new GameObject();
         Sprite backgroundSprite = new Sprite( new Texture( "background.jpg" ) );
@@ -143,17 +203,35 @@ public class GDXTop extends ApplicationAdapter {
         Box2DPositionUpdateComponent box2DPosUpdater = new Box2DPositionUpdateComponent();
         box2DPosUpdater.setBody( this.mBody );
 
+        BoxShapeDrawable boxDrawable2 = new BoxShapeDrawable();
+        boxDrawable2.set( 0.0f, 100.0f, 100.0f, 0.0f );
+        boxDrawable2.setColor( Color.BLUE );
+        RenderComponent box2DRenderComponent2 = new RenderComponent();
+        box2DRenderComponent2.setDrawable( boxDrawable2 );
+
+        Box2DMovementComponent box2DMover2 = new Box2DMovementComponent();
+        box2DMover2.setBody( otherBody );
+
+        Box2DPositionUpdateComponent box2DPosUpdater2 = new Box2DPositionUpdateComponent();
+        box2DPosUpdater2.setBody( otherBody );
+
         box2DObject.add( box2DRenderComponent );
         box2DObject.add( dumbMoverBox2D );
         box2DObject.add( box2DMover );
         box2DObject.add( box2DPosUpdater );
         box2DObject.getPosition().set( 0.0f, 100.0f );
 
+        otherBox2DObject.add( box2DRenderComponent2 );
+        otherBox2DObject.add( box2DMover2 );
+        otherBox2DObject.add( box2DPosUpdater2 );
+        otherBox2DObject.getPosition().set( 300.0f, 100.0f );
+
         this.test = box2DObject;
         this.mManager = new GameObjectManager( 64 );
         this.mManager.add( backgroundObject );
         this.mManager.add( standaloneObject );
         this.mManager.add( box2DObject );
+        this.mManager.add( otherBox2DObject );
     }
 
     @Override

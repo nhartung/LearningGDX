@@ -4,10 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 
 import nickhartung.learninggdx.GameObject;
+import nickhartung.learninggdx.physics.CollisionComponent;
 import nickhartung.libgdx.utilities.BaseObject;
 import nickhartung.utilities.FixedSizeArray;
 
@@ -27,10 +30,17 @@ public class Box2DSystem extends BaseObject {
     private HashElement[] mObjectHash;
     private GameObject mNullObject;
     private GameObject mTombstoneObject;
-    // This would need to be made non-static if we were to ever have multiple Box2DSystems in separate threads.
+    // These would need to be made non-static if we were to ever have multiple Box2DSystems in separate threads.
     private static FixedSizeArray<FixtureDef> sFixtureWorker = new FixedSizeArray<FixtureDef>( 1 );
+    private static FixedSizeArray<CollisionComponent> sCollisionWorker = new FixedSizeArray<CollisionComponent>( 1 );
 
-    public Box2DSystem( final Vector2 pGravity, final boolean pSleep, final int pVelocityIterations, final int pPositionIterations, final int pNumObjects ) {
+    public Box2DSystem( final Vector2 pGravity,
+                        final boolean pSleep,
+                        final int pVelocityIterations,
+                        final int pPositionIterations,
+                        final int pNumObjects,
+                        final ContactListener pContactListener )
+    {
         this.mWorld = new World( pGravity, pSleep );
         this.mVelocityIterations = pVelocityIterations;
         this.mPositionIterations = pPositionIterations;
@@ -47,19 +57,36 @@ public class Box2DSystem extends BaseObject {
             this.mObjectHash[ i ]     = new HashElement();
             this.mObjectHash[ i ].key = this.mNullObject;
         }
+
+        if( pContactListener != null ) {
+            this.mWorld.setContactListener( pContactListener );
+        }
     }
 
-    public Body createBody( final BodyDef pBodyDef, final FixedSizeArray<FixtureDef> pFixtureDefs, final GameObject pHostObject ) {
+    public Body createBody( final BodyDef pBodyDef,
+                            final FixedSizeArray<FixtureDef> pFixtureDefs,
+                            final FixedSizeArray<CollisionComponent> pCollisions,
+                            final GameObject pHostObject )
+    {
         Body retBody = null;
         if( this.mObjectCount < this.mMaxObjects ) {
             retBody = this.mWorld.createBody( pBodyDef );
-            final int count = pFixtureDefs.getCount();
-            Object[] fixtures = pFixtureDefs.getArray();
-            for( int i = 0; i < count; i++ ) {
-                final FixtureDef fixture = (FixtureDef)fixtures[ i ];
-                retBody.createFixture( fixture );
+            final int defCount       = pFixtureDefs.getCount();
+            Object[] fixtureDefs     = pFixtureDefs.getArray();
+            final int collisionCount = pCollisions.getCount();
+            Object[] collisions      = pCollisions.getArray();
+            for( int i = 0; i < defCount; i++ ) {
+                final FixtureDef fixtureDef = (FixtureDef)fixtureDefs[ i ];
+                final Fixture fixture = retBody.createFixture( fixtureDef );
+                if( i < collisionCount ) {
+                    final CollisionComponent collision = (CollisionComponent)collisions[ i ];
+                    fixture.setUserData( collision );
+                } else {
+                    Gdx.app.debug( "Box2DSystem", "Fixture does not have collision component. Is this intentional?" );
+                }
             }
             this.addToHash( pHostObject, retBody );
+            retBody.setUserData( pHostObject );
             this.mObjectCount++;
         } else {
             Gdx.app.error( "Box2DSystem", "Box2d Bodies have been exhausted!" );
@@ -67,10 +94,15 @@ public class Box2DSystem extends BaseObject {
         return retBody;
     }
 
-    public Body createBody( final BodyDef pBodyDef, final FixtureDef pFixtureDef, final GameObject pHostObject  ) {
+    public Body createBody( final BodyDef pBodyDef,
+                            final FixtureDef pFixtureDef,
+                            final CollisionComponent pCollision,
+                            final GameObject pHostObject  ) {
         sFixtureWorker.clear();
+        sCollisionWorker.clear();
         sFixtureWorker.add( pFixtureDef );
-        return this.createBody( pBodyDef, sFixtureWorker, pHostObject );
+        sCollisionWorker.add( pCollision );
+        return this.createBody( pBodyDef, sFixtureWorker, sCollisionWorker, pHostObject );
     }
 
     public void destroyBody( final GameObject pObject ) {
